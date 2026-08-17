@@ -1,0 +1,89 @@
+.metricas-prestamos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.metricas-prestamos .card {
+  /* Propiedades traducidas de tu Tailwind string */
+  background-color: rgba(255, 255, 255, 0.836); /* bg-card/40 */
+  backdrop-filter: blur(24px); /* backdrop-blur-xl */
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(229, 231, 235, 0.7); /* border-border/70 */
+  border-radius: 16px; /* rounded-2xl */
+  padding: 24px; /* p-6 */
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.3s ease; /* transition-all duration-300 */
+}
+
+/* HOVER EFECTOS EXACTOS */
+.metricas-prestamos .card:hover {
+  border-color: rgba(30, 58, 138, 0.2); /* hover:border-primary/20 */
+  background-color: rgba(255, 255, 255, 0.75); /* hover:bg-card/75 */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* hover:shadow-md */
+  transform: translateY(-2px); /* hover:-translate-y-[2px] */
+}
+
+.metrica-label {
+  font-size: 8pt;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+.metrica-valor {
+  font-size: 24pt;
+  font-weight: 700;
+}
+
+.metrica-valor.azul  { color: #3b82f6; }
+.metrica-valor.rojo  { color: #ef4444; }
+.metrica-valor.verde { color: #22c55e; }
+
+.filtros-prestamos {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.select-filtro {
+  padding: 8px 12px;
+  border: 1px solid rgba(229, 231, 235, 0.7);
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.836);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.select-filtro:hover {
+  border-color: rgba(30, 58, 138, 0.3);
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+.select-filtro:focus {
+  outline: none;
+  border-color: rgba(30, 58, 138, 0.5);
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+}
+
+.lista-prestamos {
+  min-height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mensaje-vacio {
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .metricas-prestamos {
+    grid-template-columns: 1fr;
+  }
+}

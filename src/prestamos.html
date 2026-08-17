@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SGRSI — Préstamos</title>
+  <link rel="stylesheet" href="common.css">
+  <link rel="stylesheet" href="prestamos.css">
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <!-- SUGERENCIA: El estado activo de las rutas y el comportamiento de colapsar
+       deben controlarse con JavaScript: añadir/quitar `activo`, manejar ARIA y
+       persistir la preferencia del usuario. -->
+    <div class="sidebar-brand">
+      <img src="logo.png" alt="Logo SGRSI" class="sidebar-logo">
+      <span class="sidebar-nombre">Lux</span>
+    </div>
+
+    <nav class="sidebar-nav" aria-label="Navegación principal">
+      <ul>
+        <li><a href="dashboard.html" class="nav-link"><span class="nav-icono">⊞</span> Inicio</a></li>
+        <li><a href="inventario.html" class="nav-link"><span class="nav-icono">📦</span> Inventario</a></li>
+        <li><a href="estado-equipos.html" class="nav-link"><span class="nav-icono">🖥</span> Estado de Equipos</a></li>
+        <li><a href="tickets.html" class="nav-link"><span class="nav-icono">🎫</span> Tickets</a></li>
+        <li><a href="prestamos.html" class="nav-link activo"><span class="nav-icono">📖</span> Préstamos</a></li>
+        <li><a href="solicitudes.html" class="nav-link"><span class="nav-icono">🔧</span> Solicitudes</a></li>
+        <li><a href="perfil.html" class="nav-link"><span class="nav-icono">👤</span> Perfil</a></li>
+      </ul>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="btn-colapsar" id="btn-colapsar" type="button">‹ Colapsar</button>
+    </div>
+  </aside>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <div class="layout">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-controles">
+        <button class="ctrl-fuente" type="button" data-size="small">A</button>
+        <button class="ctrl-fuente activo" type="button" data-size="medium">A</button>
+        <button class="ctrl-fuente" type="button" data-size="large">A</button>
+        <button class="ctrl-tema" type="button" id="btn-tema" aria-label="Cambiar tema">🌙</button>
+      </div>
+      <div class="topbar-usuario">
+        <div class="usuario-avatar">MR</div>
+        <div class="usuario-info">
+          <span class="usuario-nombre">Marcela</span>
+          <span class="usuario-rol">Administrador</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="main-content">
+
+      <section class="encabezado-pagina" aria-label="Encabezado de préstamos">
+        <div>
+          <h1>Préstamos</h1>
+          <p class="subtitulo">Gestión de préstamos de equipos</p>
+        </div>
+        <button class="btn-primario" type="button">+ Registrar préstamo</button>
+      </section>
+
+      <!-- MÉTRICAS -->
+      <section class="metricas-prestamos" aria-label="Métricas de préstamos">
+
+        <article class="card">
+          <p class="metrica-label">Activos</p>
+          <p class="metrica-valor azul">0</p>
+        </article>
+
+        <article class="card">
+          <p class="metrica-label">Vencidos</p>
+          <p class="metrica-valor rojo">0</p>
+        </article>
+
+        <article class="card">
+          <p class="metrica-label">Tasa de devolución a tiempo</p>
+          <p class="metrica-valor verde">0%</p>
+        </article>
+
+      </section>
+
+      <!-- FILTROS -->
+      <section class="filtros-prestamos" aria-label="Filtros de préstamos">
+        <select class="select-filtro" name="estado">
+          <option value="" disabled selected hidden>Todos los estados</option>
+          <option value="pendiente">Pendiente</option>
+          <option value="aprobado">Aprobado</option>
+          <option value="activo">Activo</option>
+          <option value="vencido">Vencido</option>
+          <option value="devuelto">Devuelto</option>
+        </select>
+      </section>
+
+      <!-- LISTADO -->
+      <section class="card lista-prestamos" aria-label="Listado de préstamos">
+        <p class="mensaje-vacio">No hay préstamos</p>
+        <!-- JS: aquí se renderizan las filas/tarjetas de préstamos cuando haya datos -->
+      </section>
+
+    </main>
+  </div>
+
+</body>
+</html>

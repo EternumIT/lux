@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planilla de registro de uso de sala de informática</title>
+  <link rel="stylesheet" href="planilla.css">
+</head>
+<body>
+<form id="planilla-registro" action="#" method="post">
+  <header id="titulo-planilla">
+    <h1>Planilla de registro de uso de sala de informática</h1>
+  </section>
+
+  <section id="filtros" aria-label="Filtros de registro">
+
+    <div id="filtros-izq">
+      <div class="campo-filtro">
+        <label for="asignatura">Asignatura</label>
+        <select id="asignatura" name="asignatura">
+          <option value="" disabled selected hidden>Asignatura</option>
+          <option value="ciberseguridad">Ciberseguridad</option>
+          <option value="so">Sistemas Operativos</option>
+          <option value="programacion">Programación</option>
+          <option value="redes">Redes Informáticas</option>
+          <option value="bd">Base de Datos</option>
+        </select>
+      </div>
+
+      <div class="campo-filtro">
+        <label for="docente">Docente</label>
+        <input type="text" id="docente" name="docente" placeholder="Nombre del docente">
+      </div>
+    </div>
+
+    <div id="filtros-centro">
+      <select id="laboratorio" name="laboratorio">
+        <option value="" disabled selected hidden>Laboratorio</option>
+        <option value="lab1">Lab 1</option>
+        <option value="lab2">Lab 2</option>
+        <option value="lab3">Lab 3</option>
+        <option value="lab4">Lab 4</option>
+        <option value="lab5">Lab 5</option>
+        <option value="lab6">Lab 6</option>
+      </select>
+
+      <select id="taller" name="taller">
+        <option value="" disabled selected hidden>Taller</option>
+        <option value="taller1">Taller 1</option>
+        <option value="taller2">Taller 2</option>
+      </select>
+
+      <select id="grupo" name="grupo">
+        <option value="" disabled selected hidden>Grupo</option>
+        <optgroup label="1er año">
+          <option value="1A">1A</option>
+          <option value="1B">1B</option>
+          <option value="1C">1C</option>
+          <option value="1D">1D</option>
+          <option value="1E">1E</option>
+        </optgroup>
+        <optgroup label="2do año">
+          <option value="2A">2A</option>
+          <option value="2B">2B</option>
+          <option value="2C">2C</option>
+          <option value="2D">2D</option>
+          <option value="2E">2E</option>
+        </optgroup>
+        <optgroup label="3er año">
+          <option value="3A">3A</option>
+          <option value="3B">3B</option>
+          <option value="3C">3C</option>
+          <option value="3D">3D</option>
+          <option value="3E">3E</option>
+        </optgroup>
+      </select>
+
+      <select id="turno" name="turno">
+        <option value="" disabled selected hidden>Turno</option>
+        <option value="matutino">Matutino</option>
+        <option value="vespertino">Vespertino</option>
+        <option value="nocturno">Nocturno</option>
+      </select>
+
+      <input type="date" id="fecha" name="fecha">
+    </div>
+
+    <div id="filtros-der">
+      <div class="campo-filtro">
+        <label for="hora-entrada">Hora de entrada</label>
+        <input type="time" id="hora-entrada" name="hora-entrada">
+      </div>
+
+      <div class="campo-filtro">
+        <label for="hora-salida">Hora de salida</label>
+        <input type="time" id="hora-salida" name="hora-salida">
+      </div>
+    </div>
+
+  </section>
+
+  <main>
+    <table>
+      <thead>
+        <tr>
+          <th scope="col">N° equipo</th>
+          <th scope="col">Nombre y apellido</th>
+          <th scope="col">Estado del equipo</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td><input type="text" maxlength="60"></td><td>
+          <select name="estado-equipo" class="estado-equipo">
+            <option value="" disabled selected hidden>Seleccione estado</option>
+            <option value="funcionando">Funcionando</option>
+            <option value="no-funciona">No funciona</option>
+            <option value="problema-periferico">Problema periférico (monitor)</option>
+            <option value="problema-periferico">Problema periférico (teclado)</option>
+            <option value="problema-periferico">Problema periférico (mouse)</option>
+          </select>
+        </td></tr>
+        <tr><td>2</td><td><input type="text" maxlength="60"></td><td>
+          <select name="estado-equipo" class="estado-equipo">
+            <option value="" disabled selected hidden>Seleccione estado</option>
+            <option value="funcionando">Funcionando</option>
+            <option value="no-funciona">No funciona</option>
+            <option value="problema-periferico">Problema periférico (monitor)</option>
+            <option value="problema-periferico">Problema periférico (teclado)</option>
+            <option value="problema-periferico">Problema periférico (mouse)</option>
+          </select>
+        </td></tr>
+        <tr><td>3</td><td><input type="text" maxlength="60"></td><td>
+          <select name="estado-equipo" class="estado-equipo">
+            <option value="" disabled selected hidden>Seleccione estado</option>
+            <option value="funcionando">Funcionando</option>
+            <option value="no-funciona">No funciona</option>
+            <option value="problema-periferico">Problema periférico (monitor)</option>
+            <option value="problema-periferico">Problema periférico (teclado)</option>
+            <option value="problema-periferico">Problema periférico (mouse)</option>
+          </select>
+        </td></tr>
+        <tr><td>4</td><td><input type="text" maxlength="60"></td><td>
+          <select name="estado-equipo" class="estado-equipo">
+            <option value="" disabled selected hidden>Seleccione estado</option>
+            <option value="funcionando">Funcionando</option>
+            <option value="no-funciona">No funciona</option>
+            <option value="problema-periferico">Problema periférico (monitor)</option>
+            <option value="problema-periferico">Problema periférico (teclado)</option>
+            <option value="problema-periferico">Problema periférico (mouse)</option>
+          </select>
+        </td></tr>
+        <tr><td>5</td><td><input type="text" maxlength="60"></td><td>
+          <select name="estado-equipo" class="estado-equipo">
+            <option value="" disabled selected hidden>Seleccione estado</option>
+            <option value="funcionando">Funcionando</option>
+            <option value="no-funciona">No funciona</option>
+            <option value="problema-periferico">Problema periférico (monitor)</option>
+            <option value="problema-periferico">Problema periférico (teclado)</option>
+            <option value="problema-periferico">Problema periférico (mouse)</option>
+          </select>
+        </td></tr>
+        <tr><td>6</td><td><input type="text" maxlength="60"></td><td>
+          <select name="estado-equipo" class="estado-equipo">
+            <option value="" disabled selected hidden>Seleccione estado</option>
+            <option value="funcionando">Funcionando</option>
+            <option value="no-funciona">No funciona</option>
+            <option value="problema-periferico">Problema periférico (monitor)</option>
+            <option value="problema-periferico">Problema periférico (teclado)</option>
+            <option value="problema-periferico">Problema periférico (mouse)</option>
+          </select>
+        </td></tr>
+        <tr><td>7</td><td><input type="text" maxlength="60"></td><td>
+          <select name="estado-equipo" class="estado-equipo">
+            <option value="" disabled selected hidden>Seleccione estado</option>
+            <option value="funcionando">Funcionando</option>
+            <option value="no-funciona">No funciona</option>
+            <option value="problema-periferico">Problema periférico (monitor)</option>
+            <option value="problema-periferico">Problema periférico (teclado)</option>
+            <option value="problema-periferico">Problema periférico (mouse)</option>
+          </select>
+        </td></tr>
+        <tr><td>8</td><td><input type="text" maxlength="60"></td><td>
+          <select name="estado-equipo" class="estado-equipo">
+            <option value="" disabled selected hidden>Seleccione estado</option>
+            <option value="funcionando">Funcionando</option>
+            <option value="no-funciona">No funciona</option>
+            <option value="problema-periferico">Problema periférico (monitor)</option>
+            <option value="problema-periferico">Problema periférico (teclado)</option>
+            <option value="problema-periferico">Problema periférico (mouse)</option>
+          </select>
+        </td></tr>
+        <tr><td>9</td><td><input type="text" maxlength="60"></td><td>
+          <select name="estado-equipo" class="estado-equipo">
+            <option value="" disabled selected hidden>Seleccione estado</option>
+            <option value="funcionando">Funcionando</option>
+            <option value="no-funciona">No funciona</option>
+            <option value="problema-periferico">Problema periférico (monitor)</option>
+            <option value="problema-periferico">Problema periférico (teclado)</option>
+            <option value="problema-periferico">Problema periférico (mouse)</option>
+          </select>
+        </td></tr>
+        <tr><td>10</td><td><input type="text" maxlength="60"></td><td>
+          <select name="estado-equipo" class="estado-equipo">
+            <option value="" disabled selected hidden>Seleccione estado</option>
+            <option value="funcionando">Funcionando</option>
+            <option value="no-funciona">No funciona</option>
+            <option value="problema-periferico">Problema periférico (monitor)</option>
+            <option value="problema-periferico">Problema periférico (teclado)</option>
+            <option value="problema-periferico">Problema periférico (mouse)</option>
+          </select>
+        </td></tr>
+        <tr><td>11</td><td><input type="text" maxlength="60"></td><td>
+          <select name="estado-equipo" class="estado-equipo">
+            <option value="" disabled selected hidden>Seleccione estado</option>
+            <option value="funcionando">Funcionando</option>
+            <option value="no-funciona">No funciona</option>
+            <option value="problema-periferico">Problema periférico (monitor)</option>
+            <option value="problema-periferico">Problema periférico (teclado)</option>
+            <option value="problema-periferico">Problema periférico (mouse)</option>
+          </select>
+        </td></tr>
+        <tr><td>12</td><td><input type="text" maxlength="60"></td><td>
+          <select name="estado-equipo" class="estado-equipo">
+            <option value="" disabled selected hidden>Seleccione estado</option>
+            <option value="funcionando">Funcionando</option>
+            <option value="no-funciona">No funciona</option>
+            <option value="problema-periferico">Problema periférico (monitor)</option>
+            <option value="problema-periferico">Problema periférico (teclado)</option>
+            <option value="problema-periferico">Problema periférico (mouse)</option>
+          </select>
+        </td></tr>
+        <tr><td>13</td><td><input type="text" maxlength="60"></td><td>
+          <select name="estado-equipo" class="estado-equipo">
+            <option value="" disabled selected hidden>Seleccione estado</option>
+            <option value="funcionando">Funcionando</option>
+            <option value="no-funciona">No funciona</option>
+            <option value="problema-periferico">Problema periférico (monitor)</option>
+            <option value="problema-periferico">Problema periférico (teclado)</option>
+            <option value="problema-periferico">Problema periférico (mouse)</option>
+          </select>
+        </td></tr>
+        <tr><td>14</td><td><input type="text" maxlength="60"></td><td>
+          <select name="estado-equipo" class="estado-equipo">
+            <option value="" disabled selected hidden>Seleccione estado</option>
+            <option value="funcionando">Funcionando</option>
+            <option value="no-funciona">No funciona</option>
+            <option value="problema-periferico">Problema periférico (monitor)</option>
+            <option value="problema-periferico">Problema periférico (teclado)</option>
+            <option value="problema-periferico">Problema periférico (mouse)</option>
+          </select>
+        </td></tr>
+        <tr><td>15</td><td><input type="text" maxlength="60"></td><td>
+          <select name="estado-equipo" class="estado-equipo">
+            <option value="" disabled selected hidden>Seleccione estado</option>
+            <option value="funcionando">Funcionando</option>
+            <option value="no-funciona">No funciona</option>
+            <option value="problema-periferico">Problema periférico (monitor)</option>
+            <option value="problema-periferico">Problema periférico (teclado)</option>
+            <option value="problema-periferico">Problema periférico (mouse)</option>
+          </select>
+        </td></tr>
+        <tr><td>16</td><td><input type="text" maxlength="60"></td><td>
+          <select name="estado-equipo" class="estado-equipo">
+            <option value="" disabled selected hidden>Seleccione estado</option>
+            <option value="funcionando">Funcionando</option>
+            <option value="no-funciona">No funciona</option>
+            <option value="problema-periferico">Problema periférico (monitor)</option>
+            <option value="problema-periferico">Problema periférico (teclado)</option>
+            <option value="problema-periferico">Problema periférico (mouse)</option>
+          </select>
+        </td></tr>
+        </tbody>
+    </table>
+  </main>
+    <div id="enviar-borrar">
+      <button type="reset" id="borrar-registro">Limpiar registro</button>
+      <button type="submit" id="guardar-registro">Guardar registro</button>
+    </div>
+  </form>
+</body>
+</html>

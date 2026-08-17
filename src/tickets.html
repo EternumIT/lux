@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SGRSI — Tickets</title>
+  <link rel="stylesheet" href="common.css">
+  <link rel="stylesheet" href="tickets.css">
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <!-- SUGERENCIA: usar JS para marcar la página activa y para alternar el sidebar colapsado;
+         los filtros y la búsqueda deben estar enlazados a JS para filtrar/consultar datos. -->
+    <div class="sidebar-brand">
+      <img src="logo.png" alt="Logo SGRSI" class="sidebar-logo">
+      <span class="sidebar-nombre">Lux</span>
+    </div>
+
+    <nav class="sidebar-nav" aria-label="Navegación principal">
+      <ul>
+        <li><a href="dashboard.html" class="nav-link"><span class="nav-icono">⊞</span> Inicio</a></li>
+        <li><a href="inventario.html" class="nav-link"><span class="nav-icono">📦</span> Inventario</a></li>
+        <li><a href="estado-equipos.html" class="nav-link"><span class="nav-icono">🖥</span> Estado de Equipos</a></li>
+        <li><a href="tickets.html" class="nav-link activo"><span class="nav-icono">🎫</span> Tickets</a></li>
+        <li><a href="prestamos.html" class="nav-link"><span class="nav-icono">📖</span> Préstamos</a></li>
+        <li><a href="solicitudes.html" class="nav-link"><span class="nav-icono">🔧</span> Solicitudes</a></li>
+        <li><a href="perfil.html" class="nav-link"><span class="nav-icono">👤</span> Perfil</a></li>
+      </ul>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="btn-colapsar" id="btn-colapsar" type="button">‹ Colapsar</button>
+    </div>
+  </aside>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <div class="layout">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-controles">
+        <button class="ctrl-fuente" type="button" data-size="small">A</button>
+        <button class="ctrl-fuente activo" type="button" data-size="medium">A</button>
+        <button class="ctrl-fuente" type="button" data-size="large">A</button>
+        <button class="ctrl-tema" type="button" id="btn-tema" aria-label="Cambiar tema">🌙</button>
+      </div>
+      <div class="topbar-usuario">
+        <div class="usuario-avatar">MR</div>
+        <div class="usuario-info">
+          <span class="usuario-nombre">Marcela</span>
+          <span class="usuario-rol">Administrador</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="main-content">
+
+      <section class="encabezado-pagina" aria-label="Encabezado de tickets">
+        <div>
+          <h1>Tickets</h1>
+          <p class="subtitulo">Mesa de ayuda</p>
+        </div>
+        <button class="btn-primario" type="button">+ Nuevo ticket</button>
+        <!-- ⚠️ Agregado: la captura mostraba un botón "OOL" sobre un banner de
+             error HTTP 404, que corresponde a un estado de error del sistema
+             real (no parte del diseño). Se reemplaza por el botón de acción
+             principal "Nuevo ticket", coherente con el resto de los módulos. -->
+      </section>
+
+      <!-- FILTROS -->
+      <section class="filtros-tickets" aria-label="Filtros de tickets">
+        <input type="text" class="input-busqueda" placeholder="Buscar tickets...">
+
+        <select class="select-filtro" name="estado">
+          <option value="" disabled selected hidden>Todos los estados</option>
+          <option value="pendiente">Pendiente</option>
+          <option value="en_progreso">En progreso</option>
+          <option value="en_resolucion">En resolución</option>
+          <option value="resuelto">Resuelto</option>
+        </select>
+      </section>
+
+      <!-- LISTADO -->
+      <section class="card lista-tickets" aria-label="Listado de tickets">
+        <p class="mensaje-vacio">No hay tickets</p>
+        <!-- JS: aquí se renderizan las tarjetas/filas de tickets cuando haya datos -->
+      </section>
+
+    </main>
+  </div>
+
+</body>
+</html>

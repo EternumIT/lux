@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SGRSI — Perfil</title>
+  <link rel="stylesheet" href="common.css">
+  <link rel="stylesheet" href="perfil.css">
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <!-- SUGERENCIA: el control de accesibilidad (tema, tamaño de fuente, alto contraste)
+         debe implementarse con JS para aplicar clases y guardar preferencias. -->
+    <div class="sidebar-brand">
+      <img src="logo.png" alt="Logo SGRSI" class="sidebar-logo">
+      <span class="sidebar-nombre">Lux</span>
+    </div>
+
+    <nav class="sidebar-nav" aria-label="Navegación principal">
+      <ul>
+        <li><a href="dashboard.html" class="nav-link"><span class="nav-icono">⊞</span> Inicio</a></li>
+        <li><a href="inventario.html" class="nav-link"><span class="nav-icono">📦</span> Inventario</a></li>
+        <li><a href="estado-equipos.html" class="nav-link"><span class="nav-icono">🖥</span> Estado de Equipos</a></li>
+        <li><a href="tickets.html" class="nav-link"><span class="nav-icono">🎫</span> Tickets</a></li>
+        <li><a href="prestamos.html" class="nav-link"><span class="nav-icono">📖</span> Préstamos</a></li>
+        <li><a href="solicitudes.html" class="nav-link"><span class="nav-icono">🔧</span> Solicitudes</a></li>
+        <li><a href="perfil.html" class="nav-link activo"><span class="nav-icono">👤</span> Perfil</a></li>
+      </ul>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="btn-colapsar" id="btn-colapsar" type="button">‹ Colapsar</button>
+    </div>
+  </aside>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <div class="layout">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-controles">
+        <button class="ctrl-fuente" type="button" data-size="small">A</button>
+        <button class="ctrl-fuente activo" type="button" data-size="medium">A</button>
+        <button class="ctrl-fuente" type="button" data-size="large">A</button>
+        <button class="ctrl-tema" type="button" id="btn-tema" aria-label="Cambiar tema">🌙</button>
+      </div>
+      <div class="topbar-usuario">
+        <div class="usuario-avatar">MR</div>
+        <div class="usuario-info">
+          <span class="usuario-nombre">Marcela</span>
+          <span class="usuario-rol">Administrador</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="main-content">
+
+      <section class="encabezado-pagina" aria-label="Encabezado de perfil">
+        <div>
+          <h1>Perfil</h1>
+          <p class="subtitulo">Tu información y preferencias</p>
+        </div>
+      </section>
+
+      <!-- DATOS DEL USUARIO -->
+      <section class="card datos-usuario" aria-label="Datos del usuario">
+        <div class="usuario-resumen">
+          <div class="usuario-avatar-grande">MR</div>
+          <div>
+            <p class="usuario-nombre-grande">Marcela Rodríguez</p>
+            <span class="badge-rol">Administrador</span>
+            <span class="usuario-email-inline">mrodriguez@iti.edu.uy</span>
+          </div>
+        </div>
+
+        <dl class="datos-grid">
+          <div class="dato-item">
+            <dt>Nombre completo</dt>
+            <dd>Marcela Rodríguez</dd>
+          </div>
+          <div class="dato-item">
+            <dt>Cédula</dt>
+            <dd>12345678</dd>
+          </div>
+          <div class="dato-item">
+            <dt>Email</dt>
+            <dd>mrodriguez@iti.edu.uy</dd>
+          </div>
+          <div class="dato-item">
+            <dt>Rol</dt>
+            <dd>Administrador</dd>
+          </div>
+        </dl>
+      </section>
+
+      <!-- CAMBIAR CONTRASEÑA + ACCESIBILIDAD -->
+      <section class="grid-perfil" aria-label="Configuración de cuenta">
+
+        <!-- CAMBIAR CONTRASEÑA -->
+        <article class="card">
+          <h2>🔒 Cambiar contraseña</h2>
+
+          <form class="form-password" action="#" method="post">
+            <div class="campo">
+              <label for="pass-actual">Contraseña actual</label>
+              <input type="password" id="pass-actual" name="pass-actual" autocomplete="current-password">
+            </div>
+
+            <div class="campo">
+              <label for="pass-nueva">Nueva contraseña</label>
+              <input type="password" id="pass-nueva" name="pass-nueva" autocomplete="new-password">
+            </div>
+
+            <div class="campo">
+              <label for="pass-confirmar">Confirmar nueva contraseña</label>
+              <input type="password" id="pass-confirmar" name="pass-confirmar" autocomplete="new-password">
+            </div>
+
+            <button type="submit" class="btn-primario btn-ancho-completo">Actualizar contraseña</button>
+          </form>
+        </article>
+
+        <!-- ACCESIBILIDAD -->
+        <article class="card">
+          <h2>🔤 Accesibilidad</h2>
+
+          <div class="accesibilidad-lista">
+
+            <div class="accesibilidad-item">
+              <div>
+                <p class="accesibilidad-titulo">Tema</p>
+                <p class="accesibilidad-desc">Claro u oscuro</p>
+              </div>
+              <!-- JS: toggle modo oscuro (mismo control que en topbar) -->
+              <button class="icono-toggle" type="button" id="perfil-btn-tema" aria-label="Cambiar tema">🌙</button>
+            </div>
+
+            <div class="accesibilidad-item">
+              <div>
+                <p class="accesibilidad-titulo">Tamaño de fuente</p>
+                <p class="accesibilidad-desc">S · M · L · XL</p>
+              </div>
+              <!-- JS: control de tamaño de fuente con 4 niveles -->
+              <div class="grupo-fuente">
+                <button class="ctrl-fuente" type="button" data-size="s">A</button>
+                <button class="ctrl-fuente activo" type="button" data-size="m">A</button>
+                <button class="ctrl-fuente" type="button" data-size="l">A</button>
+                <button class="ctrl-fuente" type="button" data-size="xl">A</button>
+              </div>
+            </div>
+
+            <div class="accesibilidad-item">
+              <div>
+                <p class="accesibilidad-titulo">Alto contraste</p>
+                <p class="accesibilidad-desc">Mayor visibilidad de bordes</p>
+              </div>
+              <!-- JS: toggle alto contraste -->
+              <button class="icono-toggle" type="button" id="btn-alto-contraste" aria-label="Activar alto contraste">◐</button>
+            </div>
+
+            <div class="accesibilidad-item">
+              <div>
+                <p class="accesibilidad-titulo">Fuente OpenDyslexic</p>
+                <p class="accesibilidad-desc">Mayor legibilidad para dislexia</p>
+              </div>
+              <!-- JS: toggle de fuente OpenDyslexic -->
+              <label class="switch">
+                <input type="checkbox" id="switch-opendyslexic">
+                <span class="switch-slider"></span>
+              </label>
+            </div>
+
+          </div>
+        </article>
+
+      </section>
+
+    </main>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,22 @@
+.filtros-tickets {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.lista-tickets {
+  min-height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .filtros-tickets {
+    flex-direction: column;
+  }
+  .input-busqueda,
+  .select-filtro {
+    width: 100%;
+  }
+}

@@ -1,0 +1,230 @@
+/* DATOS DEL USUARIO */
+.datos-usuario {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.usuario-resumen {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.usuario-avatar-grande {
+  width: 56px;
+  height: 56px;
+  background: #e5e7eb;
+  color: #1a1a2e;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13pt;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.usuario-nombre-grande {
+  font-size: 13pt;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.badge-rol {
+  display: inline-block;
+  background: #eff6ff;
+  color: #1e3a8a;
+  font-size: 8pt;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 999px;
+  margin-top: 4px;
+  margin-right: 8px;
+}
+
+.usuario-email-inline {
+  font-size: 9pt;
+  color: #6b7280;
+}
+
+.datos-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 20px;
+}
+
+.dato-item dt {
+  font-size: 8pt;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.dato-item dd {
+  font-size: 11pt;
+  color: #1a1a2e;
+}
+
+/* GRID CAMBIAR PASS / ACCESIBILIDAD */
+.grid-perfil {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.grid-perfil .card {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.grid-perfil h2 {
+  font-size: 11pt;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+/* FORM PASSWORD */
+.form-password {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.campo label {
+  font-size: 8pt;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+.campo input {
+  padding: 10px 14px;
+  font-size: 10pt;
+  font-family: Arial, sans-serif;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  outline: none;
+}
+
+.campo input:focus {
+  border-color: #1e3a8a;
+}
+
+.btn-ancho-completo {
+  width: 100%;
+  justify-content: center;
+}
+
+/* ACCESIBILIDAD */
+.accesibilidad-lista {
+  display: flex;
+  flex-direction: column;
+}
+
+.accesibilidad-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 1px solid #f3f4f6;
+  gap: 12px;
+}
+
+.accesibilidad-item:last-child {
+  border-bottom: none;
+}
+
+.accesibilidad-titulo {
+  font-size: 10pt;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.accesibilidad-desc {
+  font-size: 9pt;
+  color: #6b7280;
+}
+
+.icono-toggle {
+  background: none;
+  border: none;
+  font-size: 14pt;
+  cursor: pointer;
+  color: #6b7280;
+}
+
+.grupo-fuente {
+  display: flex;
+  gap: 8px;
+}
+
+/* SWITCH */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch-slider {
+  position: absolute;
+  inset: 0;
+  background-color: #d1d5db;
+  border-radius: 999px;
+  transition: 0.2s;
+  cursor: pointer;
+}
+
+.switch-slider::before {
+  content: "";
+  position: absolute;
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  transition: 0.2s;
+}
+
+.switch input:checked + .switch-slider {
+  background-color: #1e3a8a;
+}
+
+.switch input:checked + .switch-slider::before {
+  transform: translateX(18px);
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .datos-grid {
+    grid-template-columns: 1fr;
+  }
+  .grid-perfil {
+    grid-template-columns: 1fr;
+  }
+  .usuario-resumen {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

@@ -1,0 +1,398 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  font-size: 12pt;
+  background-color: #f1f5f9;
+  display: flex;
+  min-height: 100vh;
+  align-items: flex-start;
+  padding: 16px;
+  gap: 16px;
+}
+
+h1 {
+  font-size: 24px;
+}
+
+/* ========================
+   SIDEBAR
+======================== */
+.sidebar {
+  width: 240px;
+  height: calc(100vh - 32px);
+  background: #ffffff;
+  border: 1px solid rgba(229, 231, 235, 0.7);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 0;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 20px 16px;
+}
+
+.sidebar-nav {
+  flex: 1 1 auto;
+  padding: 10px 20px 20px;
+  overflow-y: auto;
+  min-height: 0;
+  background: #ffffff;
+}
+
+.sidebar-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+}
+
+.sidebar-nombre {
+  font-size: 14pt;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.sidebar-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  font-size: 11pt;
+  color: #6b7280;
+  text-decoration: none;
+  border-radius: 12px;
+  margin: 0;
+  transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+  background: #f8fafc;
+  color: #1a1a2e;
+}
+
+.nav-link.activo {
+  background: #eff6ff;
+  color: #1e3a8a;
+  font-weight: 700;
+}
+
+.nav-icono {
+  font-size: 14pt;
+}
+
+.sidebar-footer {
+  padding: 0 20px 20px;
+}
+
+/* NOTA: el botón de colapsar y el control de tema/tamaño no pueden
+   funcionar solo con CSS/HTML si queremos mantener accesibilidad y
+   persistencia de preferencias. Implementar comportamientos con JS:
+   - alternar clases (p. ej. `.collapsed`)
+   - actualizar atributos ARIA
+   - persistir en localStorage */
+.btn-colapsar {
+  width: 100%;
+  background: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 10pt;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 10px;
+  transition: background 0.2s;
+}
+
+.btn-colapsar:hover {
+  background: #f8fafc;
+  color: #1a1a2e;
+}
+
+/* ========================
+   LAYOUT
+======================== */
+.layout {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  height: calc(100vh - 32px);
+}
+
+/* ========================
+   TOPBAR
+======================== */
+.topbar {
+  background: #ffffff42;
+  border: 1px solid rgba(182, 183, 185, 0.507);
+  border-radius: 50px;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 20px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.topbar-controles {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ctrl-fuente {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+  font-size: 11pt;
+}
+
+.ctrl-fuente.activo {
+  color: #1a1a2e;
+  font-weight: 700;
+}
+
+.ctrl-tema {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14pt;
+  margin-left: 4px;
+  /* JS: al hacer click activa/desactiva modo oscuro */
+}
+
+.topbar-usuario {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-left: 1px solid #e5e7eb;
+  padding-left: 20px;
+}
+
+.usuario-avatar {
+  width: 38px;
+  height: 38px;
+  background: #1e3a8a;
+  color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10pt;
+  font-weight: 700;
+}
+
+.usuario-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.usuario-nombre {
+  font-size: 11pt;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.usuario-rol {
+  font-size: 9pt;
+  color: #6b7280;
+}
+
+/* ========================
+   MAIN CONTENT BASE
+======================== */
+.main-content {
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.encabezado-pagina {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 12px;
+}
+
+.encabezado-pagina h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.bienvenida button,
+.encabezado-pagina > button {
+  margin-left: auto;
+}
+
+.subtitulo {
+  font-size: 10pt;
+  color: #6b7280;
+  margin-top: 4px;
+}
+
+/* BOTONES GENERALES */
+.bienvenida {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.bienvenida > button {
+  margin-left: auto;
+}
+
+.btn-primario {
+  padding: 10px 18px;
+  font-size: 10pt;
+  font-family: Arial, sans-serif;
+  font-weight: 700;
+  color: #ffffff;
+  background: #1e3a8a;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.btn-primario:hover {
+  background: #162e6f;
+}
+
+.btn-exportar {
+  padding: 10px 18px;
+  font-size: 10pt;
+  font-family: Arial, sans-serif;
+  font-weight: 700;
+  color: #1a1a2e;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.btn-exportar:hover {
+  background: #f3f4f6;
+  transform: translateY(-1px);
+}
+
+.btn-secundario {
+  padding: 10px 18px;
+  font-size: 10pt;
+  font-family: Arial, sans-serif;
+  font-weight: 700;
+  color: #1a1a2e;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.btn-secundario:hover {
+  background: #f3f4f6;
+}
+
+/* INPUTS Y SELECTS GENERALES */
+.input-busqueda,
+.select-filtro {
+  padding: 10px 16px;
+  font-size: 10pt;
+  font-family: Arial, sans-serif;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #1a1a2e;
+  outline: none;
+}
+
+.input-busqueda {
+  flex: 1;
+  min-width: 200px;
+}
+
+.input-busqueda:focus,
+.select-filtro:focus {
+  border-color: #1e3a8a;
+}
+
+/* TARJETA GENÉRICA */
+.card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid #e5e7eb;
+}
+
+/* MENSAJE VACÍO */
+.mensaje-vacio {
+  text-align: center;
+  color: #6b7280;
+  font-size: 10pt;
+  padding: 40px 0;
+}
+
+/* ========================
+   RESPONSIVE — mobile first
+======================== */
+@media (max-width: 768px) {
+  body {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+    min-height: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .sidebar-nav ul {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .sidebar-footer {
+    display: none;
+  }
+  .main-content {
+    padding: 16px;
+  }
+}

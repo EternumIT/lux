@@ -1,0 +1,98 @@
+.graficas-estado {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.graficas-estado .card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.graficas-estado h2 {
+  font-size: 11pt;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.grafica-placeholder {
+  height: 220px;
+  background: #f9fafb;
+  border: 1px dashed #d1d5db;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.grafica-placeholder p {
+  font-size: 9pt;
+  color: #9ca3af;
+  text-align: center;
+  padding: 8px;
+}
+
+.grafica-leyenda {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.leyenda-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 9pt;
+  color: #6b7280;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.azul     { background-color: #3b82f6; }
+.verde    { background-color: #22c55e; }
+.amarillo { background-color: #eab308; }
+.gris     { background-color: #9ca3af; }
+
+/* TABLA */
+.tabla-equipos-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tabla-equipos {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla-equipos th {
+  text-align: left;
+  font-size: 8pt;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6b7280;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.tabla-equipos td {
+  padding: 10px 12px;
+  font-size: 10pt;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+@media (max-width: 768px) {
+  .graficas-estado {
+    grid-template-columns: 1fr;
+  }
+  .tabla-equipos-wrapper {
+    overflow-x: auto;
+  }
+}

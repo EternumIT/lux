@@ -1,0 +1,11 @@
+.filtros-solicitudes {
+  display: flex;
+  gap: 12px;
+}
+
+.lista-solicitudes {
+  min-height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

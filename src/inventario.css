@@ -1,0 +1,62 @@
+.acciones-encabezado {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filtros-inventario {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.tabs-inventario {
+  display: flex;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  padding: 4px;
+  width: fit-content;
+}
+
+.tab-btn {
+  padding: 8px 18px;
+  font-size: 10pt;
+  font-family: Arial, sans-serif;
+  font-weight: 700;
+  color: #6b7280;
+  background: transparent;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.tab-btn.activo {
+  background: #f3f4f6;
+  color: #1a1a2e;
+}
+
+.contenido-tab {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  min-height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.contenido-tab.oculto {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .filtros-inventario {
+    flex-direction: column;
+  }
+  .input-busqueda,
+  .select-filtro {
+    width: 100%;
+  }
+}

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SGRSI — Estado de Equipos</title>
+  <link rel="stylesheet" href="common.css">
+  <link rel="stylesheet" href="estado-equipos.css">
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <!-- SUGERENCIA: el sidebar requiere JS para colapsar y para gestionar la ruta activa;
+         además las gráficas indicadas abajo necesitan implementación JS (Chart.js u otra). -->
+    <div class="sidebar-brand">
+      <img src="logo.png" alt="Logo SGRSI" class="sidebar-logo">
+      <span class="sidebar-nombre">Lux</span>
+    </div>
+
+    <nav class="sidebar-nav" aria-label="Navegación principal">
+      <ul>
+        <li><a href="dashboard.html" class="nav-link"><span class="nav-icono">⊞</span> Inicio</a></li>
+        <li><a href="inventario.html" class="nav-link"><span class="nav-icono">📦</span> Inventario</a></li>
+        <li><a href="estado-equipos.html" class="nav-link activo"><span class="nav-icono">🖥</span> Estado de Equipos</a></li>
+        <li><a href="tickets.html" class="nav-link"><span class="nav-icono">🎫</span> Tickets</a></li>
+        <li><a href="prestamos.html" class="nav-link"><span class="nav-icono">📖</span> Préstamos</a></li>
+        <li><a href="solicitudes.html" class="nav-link"><span class="nav-icono">🔧</span> Solicitudes</a></li>
+        <li><a href="perfil.html" class="nav-link"><span class="nav-icono">👤</span> Perfil</a></li>
+      </ul>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="btn-colapsar" id="btn-colapsar" type="button">‹ Colapsar</button>
+    </div>
+  </aside>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <div class="layout">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-controles">
+        <button class="ctrl-fuente" type="button" data-size="small">A</button>
+        <button class="ctrl-fuente activo" type="button" data-size="medium">A</button>
+        <button class="ctrl-fuente" type="button" data-size="large">A</button>
+        <button class="ctrl-tema" type="button" id="btn-tema" aria-label="Cambiar tema">🌙</button>
+      </div>
+      <div class="topbar-usuario">
+        <div class="usuario-avatar">MR</div>
+        <div class="usuario-info">
+          <span class="usuario-nombre">Marcela</span>
+          <span class="usuario-rol">Administrador</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="main-content">
+
+      <section class="encabezado-pagina" aria-label="Encabezado de estado de equipos">
+        <div>
+          <h1>Estado de Equipos</h1>
+          <p class="subtitulo">Distribución y estado de equipos por ubicación</p>
+        </div>
+      </section>
+
+      <!-- GRÁFICAS -->
+      <section class="graficas-estado" aria-label="Gráficas de estado de equipos">
+
+        <article class="card">
+          <h2>Equipos por ubicación</h2>
+          <!-- JS: aquí va Chart.js — gráfica de dona (doughnut) -->
+          <!-- Datos: Laboratorios, Salones, Administración, Otros -->
+          <div class="grafica-placeholder">
+            <p>[ Gráfica de dona — pendiente de implementación JS ]</p>
+          </div>
+          <div class="grafica-leyenda">
+            <span class="leyenda-item"><span class="dot azul"></span> Laboratorios</span>
+            <span class="leyenda-item"><span class="dot verde"></span> Salones</span>
+            <span class="leyenda-item"><span class="dot amarillo"></span> Administración</span>
+            <span class="leyenda-item"><span class="dot gris"></span> Otros</span>
+          </div>
+        </article>
+
+        <article class="card">
+          <h2>Incidentes por ubicación</h2>
+          <!-- JS: aquí va Chart.js — gráfica de barras (bar) -->
+          <!-- Datos: Laboratorios, Salones, Administración, Otros -->
+          <div class="grafica-placeholder">
+            <p>[ Gráfica de barras — pendiente de implementación JS ]</p>
+          </div>
+        </article>
+
+      </section>
+
+      <!-- TABLA -->
+      <section class="card tabla-equipos-wrapper" aria-label="Tabla de equipos">
+        <table class="tabla-equipos">
+          <thead>
+            <tr>
+              <th scope="col">Ubicación</th>
+              <th scope="col">N° Equipo</th>
+              <th scope="col">Estado</th>
+              <th scope="col">Última actualización</th>
+              <th scope="col">Tipo</th>
+              <th scope="col">Fallas</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- JS: filas generadas dinámicamente desde la base de datos -->
+          </tbody>
+        </table>
+        <p class="mensaje-vacio">No hay equipos registrados</p>
+      </section>
+
+    </main>
+  </div>
+
+</body>
+</html>

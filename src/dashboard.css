@@ -1,0 +1,225 @@
+/* RESET GENERAL */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  font-size: 12pt;
+  background-color: #f1f5f9; /* Color gris suave moderno para resaltar los componentes */
+  display: flex;
+  min-height: 100vh;
+  align-items: flex-start;
+  padding: 16px; /* Despega el sistema de los bordes del monitor */
+  gap: 16px;
+}
+
+/* ========================
+   MÉTRICAS (Efecto Glassmorphism)
+======================== */
+.metricas {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.metrica-card {
+  /* Propiedades traducidas de tu Tailwind string */
+  background-color: rgba(255, 255, 255, 0.836); /* bg-card/40 */
+  backdrop-filter: blur(24px); /* backdrop-blur-xl */
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(229, 231, 235, 0.7); /* border-border/70 */
+  border-radius: 16px; /* rounded-2xl */
+  padding: 24px; /* p-6 */
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: all 0.3s ease; /* transition-all duration-300 */
+}
+
+/* HOVER EFECTOS EXACTOS */
+.metrica-card:hover {
+  border-color: rgba(30, 58, 138, 0.2); /* hover:border-primary/20 */
+  background-color: rgba(255, 255, 255, 0.75); /* hover:bg-card/75 */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* hover:shadow-md */
+  transform: translateY(-2px); /* hover:-translate-y-[2px] */
+}
+
+.metrica-icono-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+
+.metrica-icono {
+  font-size: 18pt;
+}
+
+.metrica-label {
+  font-size: 8pt;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+.metrica-valor {
+  font-size: 24pt;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+/* GRÁFICAS */
+.graficas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.grafica-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.grafica-card h2 {
+  font-size: 12pt;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.grafica-placeholder {
+  height: 180px;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.grafica-placeholder p {
+  font-size: 10pt;
+  color: #94a3b8;
+}
+
+.grafica-leyenda {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.leyenda-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 9pt;
+  color: #6b7280;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* ESTADO DEL SISTEMA */
+.estado-sistema {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.estado-sistema h2 {
+  font-size: 12pt;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.estado-barras {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.estado-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.estado-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.estado-label {
+  font-size: 10pt;
+  color: #6b7280;
+}
+
+.estado-valor {
+  font-size: 10pt;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.barra-fondo {
+  height: 6px;
+  background: #f1f5f9;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.barra-relleno {
+  height: 100%;
+  border-radius: 999px;
+}
+
+/* CONTENEDORES DE COLOR COMPONENTES */
+.fondo-azul    { background-color: rgba(59, 130, 246, 0.15); }
+.fondo-naranja { background-color: rgba(245, 158, 11, 0.15); }
+.fondo-verde   { background-color: rgba(34, 197, 94, 0.15); }
+.fondo-rojo    { background-color: rgba(239, 68, 68, 0.15); }
+
+.naranja { background-color: #f59e0b; }
+.azul    { background-color: #3b82f6; }
+.amarillo{ background-color: #eab308; }
+.verde   { background-color: #22c55e; }
+
+.icono-azul    { color: #3b82f6; }
+.icono-naranja { color: #f59e0b; }
+.icono-verde   { color: #22c55e; }
+.icono-rojo    { color: #ef4444; }
+
+/* RESPONSIVE (Mantenemos tu lógica mobile-first) */
+@media (max-width: 768px) {
+  body {
+    flex-direction: column;
+  }
+  .metricas, .estado-barras, .graficas {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .metricas, .estado-barras, .graficas {
+    grid-template-columns: 1fr;
+  }
+}

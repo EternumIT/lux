@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SGRSI — Iniciar sesión</title>
+  <link rel="stylesheet" href="login.css">
+</head>
+<body>
+
+  <main class="login-wrapper">
+
+    <header class="login-header">
+      <img src="logo.png" alt="Logo SGRSI" class="login-logo">
+      <h1>Iniciá sesión</h1>
+      <p class="login-subtitle">ITI CETP — Sistema de Gestión de Recursos</p>
+    </header>
+
+    <section class="login-card">
+      <!-- IMPORTANTE: el control de mostrar/ocultar contraseña y la validación del formulario
+           deben implementarse con JavaScript. Reemplazar el enlace de acceso por un `button type="submit"`
+           y gestionar el envío/validación de credenciales con JS o un backend seguro. -->
+      <form class="login-form">
+
+        <div class="campo">
+          <label for="cedula">Número de Cédula</label>
+          <input
+            type="text"
+            id="cedula"
+            name="cedula"
+            placeholder="Ej: 12345678"
+            maxlength="8"
+            autocomplete="off"
+          >
+        </div>
+
+        <div class="campo">
+          <label for="contrasena">Contraseña</label>
+          <div class="campo-password">
+            <input
+              type="password"
+              id="contrasena"
+              name="contrasena"
+              placeholder="Tu contraseña"
+              autocomplete="current-password"
+            >
+            <button type="button" class="btn-toggle-password" aria-label="Mostrar contraseña" id="toggle-password">
+              <!-- ícono ojo -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                <circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <a href="dashboard.html" class="btn-ingresar">Ingresar</a>
+
+      </form>
+    </section>
+
+    <footer class="login-footer">
+      <p>ITI CETP 2026 · Los accesos son gestionados por administración</p>
+    </footer>
+
+  </main>
+
+</body>
+</html>
