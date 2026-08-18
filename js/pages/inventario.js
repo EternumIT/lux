@@ -56,7 +56,7 @@
     function renderEquipos(lista) {
       if (!lista.length) {
         panelEquipos.innerHTML =
-          '<p class="mensaje-vacio"><span class="text-3xl opacity-50">📦</span>No se encontraron equipos</p>';
+          '<p class="mensaje-vacio">' + Eternum.iconos.svg("inventario", "icono-vacio") + 'No se encontraron equipos</p>';
         return;
       }
 
@@ -78,7 +78,7 @@
     function renderComponentes(lista) {
       if (!lista.length) {
         panelComponentes.innerHTML =
-          '<p class="mensaje-vacio"><span class="text-3xl opacity-50">⚙</span>No se encontraron componentes</p>';
+          '<p class="mensaje-vacio">' + Eternum.iconos.svg("componente", "icono-vacio") + 'No se encontraron componentes</p>';
         return;
       }
 
@@ -126,8 +126,10 @@
       equipos = res[0];
       componentes = res[1];
 
-      if (botonesTab[0]) botonesTab[0].textContent = "📦 Equipos (" + equipos.length + ")";
-      if (botonesTab[1]) botonesTab[1].textContent = "⚙ Componentes (" + componentes.length + ")";
+      var textoEquipos = botonesTab[0] && botonesTab[0].querySelector(".tab-texto");
+      var textoComponentes = botonesTab[1] && botonesTab[1].querySelector(".tab-texto");
+      if (textoEquipos) textoEquipos.textContent = "Equipos (" + equipos.length + ")";
+      if (textoComponentes) textoComponentes.textContent = "Componentes (" + componentes.length + ")";
 
       refrescar();
     }).catch(function (err) {

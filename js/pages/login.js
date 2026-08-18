@@ -16,6 +16,9 @@
       var visible = pass.type === "text";
       pass.type = visible ? "password" : "text";
       toggle.setAttribute("aria-label", visible ? "Mostrar contraseña" : "Ocultar contraseña");
+      toggle.setAttribute("aria-pressed", visible ? "false" : "true");
+      // La clase decide cuál de los dos iconos se ve (ver assets/css/input.css).
+      toggle.classList.toggle("mostrando", !visible);
       toggle.classList.toggle("text-primario", !visible);
     });
 

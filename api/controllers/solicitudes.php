@@ -45,6 +45,9 @@ function solicitudes_crear(): never
            FROM solicitudes WHERE id = ?'
     );
     $stmt->execute([$id]);
+    $solicitud = $stmt->fetch();
 
-    json_response(cast_row($stmt->fetch()), 201);
+    auditar('solicitud.crear', 'solicitud', (string) $id, $solicitud['titulo']);
+
+    json_response(cast_row($solicitud), 201);
 }

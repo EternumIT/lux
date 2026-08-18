@@ -3,3 +3,9 @@ package-lock.json
 
 # Configuración local con credenciales propias de cada máquina
 api/config.local.php
+
+# Datos de la instancia local de MariaDB (npm run main)
+database/datos/
+
+# Configuracion personal del lanzador
+eternum.config.local.json

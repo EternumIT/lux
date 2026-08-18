@@ -97,6 +97,53 @@ function require_date(mixed $valor, string $campo): string
     return $valor;
 }
 
+/* ---------------------------------------------------------------------
+ * Texto con acentos, sin depender de mbstring
+ *
+ * La extensión mbstring no siempre viene activada (pasa seguido con PHP
+ * instalado por separado, fuera de XAMPP). Como los nombres del sistema llevan
+ * acentos y ñ, contar bytes en lugar de caracteres daría resultados mal.
+ * Estas funciones usan mbstring si está, y si no recurren a PCRE con el
+ * modificador /u, que forma parte del núcleo de PHP y siempre está disponible.
+ * ------------------------------------------------------------------- */
+
+/** Largo en caracteres (no en bytes). */
+function texto_largo(string $texto): int
+{
+    if (function_exists('mb_strlen')) {
+        return mb_strlen($texto, 'UTF-8');
+    }
+
+    return (int) preg_match_all('/./us', $texto);
+}
+
+/** Primer carácter, respetando los multibyte. */
+function texto_primer_caracter(string $texto): string
+{
+    if (preg_match('/^./us', $texto, $coincidencia)) {
+        return $coincidencia[0];
+    }
+
+    return '';
+}
+
+/** Pasa a mayúsculas incluyendo las vocales acentuadas y la ñ. */
+function texto_mayusculas(string $texto): string
+{
+    if (function_exists('mb_strtoupper')) {
+        return mb_strtoupper($texto, 'UTF-8');
+    }
+
+    // strtoupper solo entiende ASCII, así que las acentuadas se convierten antes.
+    $acentos = [
+        'á' => 'Á', 'é' => 'É', 'í' => 'Í', 'ó' => 'Ó', 'ú' => 'Ú',
+        'à' => 'À', 'è' => 'È', 'ì' => 'Ì', 'ò' => 'Ò', 'ù' => 'Ù',
+        'ñ' => 'Ñ', 'ü' => 'Ü', 'ç' => 'Ç',
+    ];
+
+    return strtoupper(strtr($texto, $acentos));
+}
+
 /**
  * Normaliza una fila de la base de datos al formato que espera el frontend
  * (ids como string, booleanos reales, camelCase donde corresponde).

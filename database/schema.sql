@@ -17,6 +17,7 @@ CREATE DATABASE IF NOT EXISTS eternum
 USE eternum;
 
 -- Se eliminan en orden inverso a las dependencias (claves foráneas).
+DROP TABLE IF EXISTS auditoria;
 DROP TABLE IF EXISTS solicitudes;
 DROP TABLE IF EXISTS prestamos;
 DROP TABLE IF EXISTS tickets;
@@ -35,6 +36,10 @@ CREATE TABLE usuarios (
   rol           ENUM('Root', 'Administrador', 'Tecnico', 'Docente') NOT NULL DEFAULT 'Docente',
   password_hash VARCHAR(255) NOT NULL,
   iniciales     VARCHAR(4)   NOT NULL,
+  -- Un usuario bloqueado sigue existiendo (y conserva su historial), pero no
+  -- puede iniciar sesión. Se prefiere esto a borrarlo, porque los tickets y
+  -- préstamos guardan el nombre de quien los pidió.
+  bloqueado     TINYINT(1)   NOT NULL DEFAULT 0,
   creado        TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (id),
   UNIQUE KEY uq_usuarios_cedula (cedula),
@@ -125,16 +130,46 @@ CREATE TABLE solicitudes (
   KEY idx_solicitudes_estado (estado)
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
 
+-- ---------------------------------------------------------------------
+-- AUDITORÍA
+-- Deja constancia de quién hizo qué y cuándo. Es solo de lectura desde la
+-- aplicación: se escribe automáticamente y no se edita ni se borra.
+-- ---------------------------------------------------------------------
+CREATE TABLE auditoria (
+  id             BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  fecha_hora     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+  -- Se guarda el id, pero también una copia del nombre y el rol: si más
+  -- adelante se borra el usuario, el registro sigue diciendo quién fue.
+  usuario_id     INT UNSIGNED DEFAULT NULL,
+  usuario_nombre VARCHAR(120) NOT NULL,
+  usuario_rol    VARCHAR(20)  NOT NULL,
+
+  accion         VARCHAR(40)  NOT NULL,
+  entidad        VARCHAR(40)  DEFAULT NULL,
+  entidad_id     VARCHAR(40)  DEFAULT NULL,
+  detalle        VARCHAR(255) DEFAULT NULL,
+
+  PRIMARY KEY (id),
+  KEY idx_auditoria_fecha (fecha_hora),
+  KEY idx_auditoria_usuario (usuario_id),
+  KEY idx_auditoria_accion (accion),
+  CONSTRAINT fk_auditoria_usuario FOREIGN KEY (usuario_id)
+    REFERENCES usuarios (id) ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;
+
 -- =====================================================================
 -- DATOS DE EJEMPLO
 --
 -- Contraseñas (hash bcrypt generado con password_hash de PHP):
+--   00000000 → root2026      (Root del sistema  · Root)
 --   12345678 → admin123      (Marcela Rodríguez · Administrador)
 --   87654321 → tecnico123    (Julián Pérez      · Técnico)
 --   11223344 → docente123    (Ana Gómez         · Docente)
 -- =====================================================================
 
 INSERT INTO usuarios (cedula, nombre, email, rol, password_hash, iniciales) VALUES
+  ('00000000', 'Root del sistema',  'root@iti.edu.uy',       'Root',          '$2y$12$0p7Qv7aNX.aIDXeDDT2MG.eQ1tPMbWzigbW9Md5aHptQ6/.eZJXT2', 'RT'),
   ('12345678', 'Marcela Rodríguez', 'mrodriguez@iti.edu.uy', 'Administrador', '$2y$12$U7ht1I7MEZ6YW9Y88afwjOSNj26Wct1J7FOiGkcoK54DkGNvoSqc2', 'MR'),
   ('87654321', 'Julián Pérez',      'jperez@iti.edu.uy',     'Tecnico',       '$2y$12$qfc/Y9dgNMvzsIdljo6ZfO6B7HdIxBUWijIvirB35KCa3JcR5Z6wK', 'JP'),
   ('11223344', 'Ana Gómez',         'agomez@iti.edu.uy',     'Docente',       '$2y$12$aKiydVLNorGzqwp0hqwBiesxm2pOmSYeA5cMrJfmBTC/mqcQD.ZXi', 'AG');

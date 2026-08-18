@@ -58,6 +58,10 @@ function equipos_crear(): never
            FROM equipos WHERE id = ?'
     );
     $stmt->execute([$id]);
+    $equipo = $stmt->fetch();
 
-    json_response(cast_row($stmt->fetch()), 201);
+    auditar('equipo.crear', 'equipo', (string) $id,
+        $equipo['marca'] . ' ' . $equipo['modelo'] . ' · serie ' . $equipo['serie']);
+
+    json_response(cast_row($equipo), 201);
 }

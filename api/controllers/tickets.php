@@ -67,6 +67,8 @@ function tickets_crear(): never
     $ticket = $stmt->fetch();
     $ticket['equipoId'] = $ticket['equipoId'] === null ? null : (string) $ticket['equipoId'];
 
+    auditar('ticket.crear', 'ticket', (string) $id, $ticket['titulo']);
+
     json_response(cast_row($ticket), 201);
 }
 
@@ -96,6 +98,9 @@ function tickets_actualizar_estado(int $id): never
     $stmt->execute([$id]);
     $ticket = $stmt->fetch();
     $ticket['equipoId'] = $ticket['equipoId'] === null ? null : (string) $ticket['equipoId'];
+
+    auditar('ticket.estado', 'ticket', (string) $id,
+        $ticket['titulo'] . ' → ' . $estado);
 
     json_response(cast_row($ticket));
 }

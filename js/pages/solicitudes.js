@@ -25,7 +25,7 @@
 
       if (!filtradas.length) {
         lista.innerHTML =
-          '<p class="mensaje-vacio"><span class="text-3xl opacity-50">🔧</span>No hay solicitudes de servicio</p>';
+          '<p class="mensaje-vacio">' + Eternum.iconos.svg("solicitudes", "icono-vacio") + 'No hay solicitudes de servicio</p>';
         return;
       }
 
@@ -37,8 +37,8 @@
                 ' <span class="insignia insignia-' + s.estado + '">' + ESTADOS[s.estado] + "</span>" +
               "</div>" +
               '<div class="item-meta">' +
-                "<span>👤 " + utils.escapeHtml(s.solicitante) + "</span>" +
-                "<span>📅 " + utils.formatDate(s.creado) + "</span>" +
+                "<span>" + Eternum.iconos.svg("profile", "icono-meta") + " " + utils.escapeHtml(s.solicitante) + "</span>" +
+                "<span>" + Eternum.iconos.svg("calendario", "icono-meta") + " " + utils.formatDate(s.creado) + "</span>" +
               "</div>" +
               (s.detalle ? '<p class="text-sm text-tenue">' + utils.escapeHtml(s.detalle) + "</p>" : "") +
             "</div>" +

@@ -1,0 +1,48 @@
+{
+  "$comentario": [
+    "Configuracion de 'npm run main'. Para cambiar algo solo en TU maquina,",
+    "copia este archivo a 'eternum.config.local.json' y edita ahi: ese archivo",
+    "no se sube al repositorio y pisa los valores de este.",
+    "",
+    "modo: 'mariadb' -> el comando levanta su propia base de datos (no hace",
+    "                   falta instalar XAMPP, solo tener MariaDB).",
+    "      'xampp'   -> usa el MySQL/MariaDB que ya corre en XAMPP."
+  ],
+
+  "modo": "mariadb",
+
+  "servidor": {
+    "puerto": 8080,
+    "host": "localhost",
+    "abrirNavegador": true
+  },
+
+  "baseDatos": {
+    "nombre": "eternum",
+    "importarSiFalta": true
+  },
+
+  "mariadb": {
+    "rutaBin": "",
+    "carpetaDatos": "database/datos",
+    "puerto": 3307,
+    "usuario": "root",
+    "password": ""
+  },
+
+  "xampp": {
+    "raiz": "C:/xampp",
+    "puerto": 3306,
+    "usuario": "root",
+    "password": "",
+    "iniciarServicios": false
+  },
+
+  "php": {
+    "ruta": ""
+  },
+
+  "tailwind": {
+    "compilarAlIniciar": true
+  }
+}

@@ -49,6 +49,10 @@ function componentes_crear(): never
            FROM componentes WHERE id = ?'
     );
     $stmt->execute([$id]);
+    $componente = $stmt->fetch();
 
-    json_response(cast_row($stmt->fetch(), [], ['esFabrica', 'funcionando']), 201);
+    auditar('componente.crear', 'componente', (string) $id,
+        $componente['nombre'] . ' ' . $componente['modelo']);
+
+    json_response(cast_row($componente, [], ['esFabrica', 'funcionando']), 201);
 }

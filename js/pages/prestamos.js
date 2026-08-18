@@ -49,7 +49,7 @@
 
       if (!filtrados.length) {
         lista.innerHTML =
-          '<p class="mensaje-vacio"><span class="text-3xl opacity-50">📖</span>No hay préstamos</p>';
+          '<p class="mensaje-vacio">' + Eternum.iconos.svg("prestamos", "icono-vacio") + 'No hay préstamos</p>';
         return;
       }
 
@@ -61,9 +61,9 @@
                 ' <span class="insignia insignia-' + p.estado + '">' + ESTADOS[p.estado] + "</span>" +
               "</div>" +
               '<div class="item-meta">' +
-                "<span>👤 " + utils.escapeHtml(p.solicitante) + "</span>" +
-                "<span>📅 Desde " + utils.formatDate(p.fechaInicio) + "</span>" +
-                "<span>⏳ Hasta " + utils.formatDate(p.fechaLimite) + "</span>" +
+                "<span>" + Eternum.iconos.svg("profile", "icono-meta") + " " + utils.escapeHtml(p.solicitante) + "</span>" +
+                "<span>" + Eternum.iconos.svg("calendario", "icono-meta") + " Desde " + utils.formatDate(p.fechaInicio) + "</span>" +
+                "<span>" + Eternum.iconos.svg("vence", "icono-meta") + " Hasta " + utils.formatDate(p.fechaLimite) + "</span>" +
               "</div>" +
             "</div>" +
             '<div class="flex shrink-0 items-center gap-2.5">' +

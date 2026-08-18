@@ -78,6 +78,9 @@ function prestamos_crear(): never
     $prestamo = $stmt->fetch();
     $prestamo['equipoId'] = $prestamo['equipoId'] === null ? null : (string) $prestamo['equipoId'];
 
+    auditar('prestamo.crear', 'prestamo', (string) $id,
+        'Para ' . $prestamo['solicitante'] . ' hasta ' . $prestamo['fechaLimite']);
+
     json_response(cast_row($prestamo), 201);
 }
 
@@ -106,6 +109,9 @@ function prestamos_actualizar_estado(int $id): never
     $stmt->execute([$id]);
     $prestamo = $stmt->fetch();
     $prestamo['equipoId'] = $prestamo['equipoId'] === null ? null : (string) $prestamo['equipoId'];
+
+    auditar('prestamo.estado', 'prestamo', (string) $id,
+        $prestamo['solicitante'] . ' → ' . $estado);
 
     json_response(cast_row($prestamo));
 }

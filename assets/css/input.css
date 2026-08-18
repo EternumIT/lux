@@ -25,13 +25,26 @@
   --color-primario-oscuro: #162e6f;
   --color-primario-suave: #eff6ff;
 
-  --color-fondo: #f1f5f9;
+  /* El fondo va bastante más abajo que el blanco de las tarjetas.
+     Cerca del blanco el ojo distingue mucho peor las diferencias de luminancia
+     que cerca del negro, así que el tema claro necesita MÁS separación que el
+     oscuro para verse igual de definido, no la misma.
+       antes: 1.10:1 → 1.18:1  ·  ahora: 1.32:1  (el oscuro está en 1.10:1) */
+  --color-fondo: #d9e1ed;
   --color-superficie: #ffffff;
-  --color-borde: #e5e7eb;
+  --color-borde: #c1cbda;
 
+  /* Los grises de texto se oscurecen en la misma proporción: sobre el fondo
+     nuevo, los de antes se quedaban por debajo del mínimo AA de 4.5:1. */
   --color-texto: #1a1a2e;
-  --color-tenue: #6b7280;
-  --color-debil: #9ca3af;
+  --color-tenue: #515963;
+  --color-debil: #5c6470;
+
+  /* Sombra de reposo de las superficies.
+     Es la otra mitad de lo que da profundidad en un tema claro: el modo oscuro
+     se apoya en el contraste de luminancia, pero en claro las tarjetas
+     necesitan levantarse del fondo. */
+  --sombra-superficie: 0 1px 2px rgba(15, 23, 42, 0.07), 0 2px 8px rgba(15, 23, 42, 0.05);
 
   --color-exito: #22c55e;
   --color-exito-suave: rgba(34, 197, 94, 0.15);
@@ -65,6 +78,10 @@
   --color-aviso-suave: rgba(245, 158, 11, 0.18);
   --color-info-suave: rgba(59, 130, 246, 0.18);
   --color-amarillo-suave: rgba(234, 179, 8, 0.18);
+
+  /* En oscuro la profundidad la da el contraste entre superficies: una sombra
+     sobre un fondo casi negro no se ve y solo ensucia los bordes. */
+  --sombra-superficie: none;
 }
 
 /* ---------------------------------------------------------------------
@@ -81,12 +98,23 @@
 
   html {
     font-size: calc(16px * var(--escala-fuente));
+    /* El color va también en <html>, no solo en <body>: el navegador pinta el
+       fondo del documento antes de aplicar los estilos del body, y sin esto se
+       ve un destello blanco al recargar con el modo oscuro puesto. */
+    background-color: var(--color-fondo);
   }
 
   body {
     background-color: var(--color-fondo);
     color: var(--color-texto);
     font-family: Arial, Helvetica, sans-serif;
+  }
+
+  /* La transición de color se activa recién cuando la página ya cargó (lo marca
+     js/app.js). Si estuviera activa desde el principio, cambiar de tema al
+     arrancar se vería como un fundido desde el color anterior. */
+  html[data-listo="true"],
+  html[data-listo="true"] body {
     transition: background-color 0.2s ease, color 0.2s ease;
   }
 
@@ -113,9 +141,10 @@
   /* ---- Estructura ---- */
   .barra-lateral {
     @apply w-60 shrink-0 flex flex-col justify-between overflow-hidden
-           rounded-2xl border border-borde bg-superficie shadow-sm
+           rounded-2xl border border-borde bg-superficie
            sticky top-0 transition-[width] duration-200;
     height: calc(100vh - 2rem);
+    box-shadow: var(--sombra-superficie);
   }
   .barra-lateral.contraida { @apply w-[5.25rem]; }
 
@@ -139,7 +168,15 @@
 
   .barra-superior {
     @apply flex items-center justify-end gap-5 rounded-[50px] border border-borde
-           bg-superficie/70 px-6 py-3.5 shadow-sm backdrop-blur-md;
+           bg-superficie/70 px-6 py-3.5 backdrop-blur-md;
+    box-shadow: var(--sombra-superficie);
+
+    /* El backdrop-blur crea un contexto de apilado propio. Sin un z-index
+       explícito, las tarjetas del contenido (que también usan blur y vienen
+       después en el documento) se dibujan por encima y tapan el menú del
+       usuario. Con esto la barra y su menú quedan siempre adelante. */
+    position: relative;
+    z-index: 30;
   }
 
   /* ---- Botones ---- */
@@ -185,11 +222,15 @@
   .error-global.visible { @apply block; }
 
   /* ---- Superficies ---- */
-  .tarjeta { @apply rounded-xl border border-borde bg-superficie p-6 transition-colors; }
+  .tarjeta {
+    @apply rounded-xl border border-borde bg-superficie p-6 transition-colors;
+    box-shadow: var(--sombra-superficie);
+  }
   .tarjeta-metrica {
     @apply flex flex-col gap-1 rounded-2xl border border-borde bg-superficie/85 p-6
            backdrop-blur-xl transition-all hover:-translate-y-0.5
            hover:border-primario hover:shadow-lg;
+    box-shadow: var(--sombra-superficie);
   }
   .metrica-etiqueta { @apply text-[0.7rem] font-bold uppercase tracking-wider text-tenue; }
   .metrica-valor { @apply text-4xl font-bold text-texto; }
@@ -198,7 +239,8 @@
   .item-lista {
     @apply flex flex-wrap items-center justify-between gap-4 rounded-xl border
            border-borde bg-superficie px-5 py-4 transition-all
-           hover:border-primario hover:shadow-sm hover:-translate-y-px;
+           hover:border-primario hover:-translate-y-px;
+    box-shadow: var(--sombra-superficie);
   }
   .item-lista + .item-lista { @apply mt-2.5; }
   .item-titulo { @apply flex flex-wrap items-center gap-2 text-base font-bold text-texto; }
@@ -278,6 +320,39 @@
     inset: 22%;
   }
 
+  /* ---- Iconos (Clarity) ----
+     Se pintan con fill="currentColor", así que toman el color del texto que los
+     rodea. Ese color siempre sale de una variable del tema, por lo que cambian
+     solos al alternar el modo oscuro o el alto contraste, sin JavaScript. */
+  .icono { @apply inline-block h-[1.15em] w-[1.15em] shrink-0 align-[-0.15em]; fill: currentColor; }
+  .icono-nav { @apply h-5 w-5; }
+  .icono-btn { @apply h-[1.1em] w-[1.1em]; }
+  .icono-menu { @apply h-4 w-4; }
+  .icono-metrica { @apply h-6 w-6; }
+  .icono-tab { @apply h-4 w-4; }
+  /* En los metadatos de las listas el icono acompaña al texto, más apagado. */
+  .icono-meta { @apply h-4 w-4 opacity-70; }
+  /* Los estados vacíos llevan el icono grande y arriba del mensaje. */
+  .icono-vacio { @apply mb-1 h-9 w-9 text-debil opacity-50; }
+  .icono-tilde { @apply h-4 w-4; }
+  /* El icono de "volver" es una flecha hacia arriba: se gira para que apunte a la izquierda. */
+  .icono-volver { @apply h-4 w-4 -rotate-90; }
+
+  /* ---- Pestañas de la sección administrativa ---- */
+  .tab-admin {
+    @apply inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold
+           text-tenue no-underline transition-colors hover:bg-fondo hover:text-texto;
+  }
+  .tab-admin.activo { @apply bg-primario-suave text-primario; }
+  .tab-admin.activo .icono-linea { display: none; }
+  .tab-admin.activo .icono-solido { display: inline; }
+
+  /* La sección activa del menú usa la variante rellena, que pesa más
+     visualmente y refuerza dónde está parado el usuario. */
+  .icono-solido { display: none; }
+  .nav-link.activo .icono-linea { display: none; }
+  .nav-link.activo .icono-solido { display: inline; }
+
   .punto { @apply inline-block h-2.5 w-2.5 rounded-full; }
   .leyenda { @apply flex flex-wrap gap-4 text-sm text-tenue; }
   .leyenda-item { @apply flex items-center gap-1.5; }
@@ -308,7 +383,11 @@
 
 /* --- Alto contraste sobre tema claro: negro puro sobre blanco puro --- */
 [data-contrast="high"] {
-  --color-fondo: #ffffff;
+  /* El fondo de página se deja igual que en el modo claro normal, a propósito.
+     Si acá también fuera blanco, el fondo y las tarjetas quedarían del mismo
+     color y la única separación sería el borde: se perdería la estructura de
+     la pantalla justo en el modo pensado para verla mejor. */
+  --color-fondo: #d9e1ed;
   --color-superficie: #ffffff;
   --color-texto: #000000;
   --color-tenue: #000000;
@@ -425,6 +504,28 @@
   outline: 3px solid var(--color-primario);
   outline-offset: 2px;
 }
+
+/* =====================================================================
+   ICONOS QUE DEPENDEN DEL ESTADO
+
+   El botón de tema lleva los dos iconos dentro y el CSS decide cuál se ve
+   mirando data-theme en <html>. Al ser el mismo atributo que cambia el resto
+   de los colores, el icono se actualiza en el mismo instante que el modo,
+   sin pasar por JavaScript.
+   ===================================================================== */
+
+/* Modo claro: se ofrece pasar a oscuro, así que se muestra la luna. */
+.icono-modo-claro { display: none; }
+.icono-modo-oscuro { display: inline-block; }
+
+/* Modo oscuro: se ofrece volver a claro, así que se muestra el sol. */
+[data-theme="dark"] .icono-modo-claro { display: inline-block; }
+[data-theme="dark"] .icono-modo-oscuro { display: none; }
+
+/* Mostrar u ocultar la contraseña: lo alterna js/pages/login.js. */
+.icono-ojo-tachado { display: none; }
+#toggle-password.mostrando .icono-ojo { display: none; }
+#toggle-password.mostrando .icono-ojo-tachado { display: inline-block; }
 
 /* --------------------------------------------------------------------- */
 @keyframes aparecer { from { opacity: 0; } to { opacity: 1; } }

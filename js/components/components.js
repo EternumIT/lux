@@ -34,8 +34,12 @@ Eternum.components = (function () {
     /** Refleja el estado actual en todos los controles visibles. */
     function syncControls(prefs) {
       utils.qsa(".ctrl-tema").forEach(function (btn) {
-        btn.setAttribute("aria-pressed", prefs.theme === "dark" ? "true" : "false");
-        btn.textContent = prefs.theme === "dark" ? "☀" : "🌙";
+        var oscuro = prefs.theme === "dark";
+        btn.setAttribute("aria-pressed", oscuro ? "true" : "false");
+        // El icono lo intercambia el CSS mirando data-theme; acá solo se
+        // mantiene la etiqueta accesible al día. Escribir el contenido del
+        // botón borraría los SVG que lleva dentro.
+        btn.setAttribute("aria-label", oscuro ? "Cambiar a modo claro" : "Cambiar a modo oscuro");
       });
 
       utils.qsa("[data-size]").forEach(function (btn) {
@@ -47,9 +51,10 @@ Eternum.components = (function () {
         btn.classList.toggle("font-bold", activo);
       });
 
-      utils.qsa("#btn-alto-contraste").forEach(function (btn) {
-        btn.setAttribute("aria-pressed", prefs.highContrast ? "true" : "false");
-        btn.classList.toggle("activo", prefs.highContrast);
+      // Alto contraste y OpenDyslexic usan el mismo tipo de control: un
+      // interruptor de encendido/apagado.
+      utils.qsa("#switch-alto-contraste").forEach(function (input) {
+        input.checked = !!prefs.highContrast;
       });
 
       utils.qsa("#switch-opendyslexic").forEach(function (input) {
@@ -72,8 +77,8 @@ Eternum.components = (function () {
       return update({ fontSize: size });
     }
 
-    function toggleHighContrast() {
-      return update({ highContrast: !get().highContrast });
+    function toggleHighContrast(forzar) {
+      return update({ highContrast: forzar !== undefined ? forzar : !get().highContrast });
     }
 
     function toggleDyslexic(forzar) {
@@ -91,8 +96,10 @@ Eternum.components = (function () {
           setFontSize(btn.getAttribute("data-size"));
         });
       });
-      utils.qsa("#btn-alto-contraste").forEach(function (btn) {
-        utils.on(btn, "click", toggleHighContrast);
+      utils.qsa("#switch-alto-contraste").forEach(function (input) {
+        utils.on(input, "change", function () {
+          toggleHighContrast(input.checked);
+        });
       });
       utils.qsa("#switch-opendyslexic").forEach(function (input) {
         utils.on(input, "change", function () {
@@ -232,7 +239,9 @@ Eternum.components = (function () {
       caja.innerHTML =
         '<div class="modal-cabecera">' +
           '<h2 class="text-base font-bold text-texto">' + utils.escapeHtml(opts.title || "") + "</h2>" +
-          '<button type="button" class="modal-cerrar btn-icono" aria-label="Cerrar">✕</button>' +
+          '<button type="button" class="modal-cerrar btn-icono" aria-label="Cerrar">' +
+            Eternum.iconos.svg("cerrar", "icono-btn") +
+          "</button>" +
         "</div>" +
         '<div class="modal-cuerpo">' + (opts.bodyHtml || "") + "</div>" +
         '<div class="modal-pie">' +

@@ -38,11 +38,18 @@ Eternum.services = (function () {
    */
   function apiRequest(ruta, options) {
     options = options || {};
-    var url = API_BASE + "/index.php?_ruta=" + encodeURIComponent(ruta.replace(/^\//, ""));
+    // La ruta puede traer su propia cadena de consulta ("/auditoria?desde=...").
+    // Se separan: la ruta se codifica y los filtros se pegan aparte.
+    var partes = ruta.replace(/^\//, "").split("?");
+    var url = API_BASE + "/index.php?_ruta=" + encodeURIComponent(partes[0]) +
+      (partes[1] ? "&" + partes[1] : "");
 
     return fetch(url, {
       method: options.method || "GET",
       headers: { "Content-Type": "application/json" },
+      // La sesión viaja en una cookie, así que hay que mandarla en cada llamada:
+      // es lo que permite que el servidor sepa quién sos y controle los permisos.
+      credentials: "same-origin",
       body: options.body ? JSON.stringify(options.body) : undefined
     }).then(function (res) {
       if (res.status === 204) return null;
@@ -92,9 +99,70 @@ Eternum.services = (function () {
     },
     logout: function () {
       utils.storageRemove(SESSION_KEY);
+      if (USE_MOCK) return Promise.resolve();
+      // Aunque falle, la sesión local ya se borró: no tiene sentido frenar la salida.
+      return apiRequest("/auth/logout", { method: "POST" }).catch(function () {});
     },
+
+    /* Lectura rápida desde localStorage, para pintar la interfaz sin esperar. */
     getSession: function () {
       return utils.storageGet(SESSION_KEY, null);
+    },
+
+    /**
+     * Pregunta al servidor quién está autenticado.
+     * Es la fuente de verdad: localStorage se puede editar a mano, la sesión no.
+     */
+    verificarSesion: function () {
+      if (USE_MOCK) return Promise.resolve(utils.storageGet(SESSION_KEY, null));
+
+      return apiRequest("/auth/sesion")
+        .then(function (usuario) {
+          utils.storageSet(SESSION_KEY, usuario);
+          return usuario;
+        })
+        .catch(function () {
+          utils.storageRemove(SESSION_KEY);
+          return null;
+        });
+    }
+  };
+
+  /* ---------------- USUARIOS (sección administrativa) ---------------- */
+  var usuarios = {
+    getUsuarios: function () {
+      return apiRequest("/usuarios");
+    },
+    createUsuario: function (data) {
+      return apiRequest("/usuarios", { method: "POST", body: data });
+    },
+    updateUsuario: function (id, data) {
+      return apiRequest("/usuarios/" + id, { method: "PATCH", body: data });
+    },
+    setBloqueo: function (id, bloqueado) {
+      return apiRequest("/usuarios/" + id + "/bloqueo", {
+        method: "PATCH",
+        body: { bloqueado: !!bloqueado }
+      });
+    }
+  };
+
+  /* ---------------- AUDITORIA ---------------- */
+  var auditoria = {
+    /**
+     * Trae el registro filtrado.
+     * Los filtros van como cadena de consulta ya armada ("desde=...&accion=...");
+     * el filtrado ocurre en el servidor, no en el navegador.
+     */
+    getRegistros: function (filtros) {
+      return apiRequest("/auditoria" + (filtros ? "?" + filtros : ""));
+    }
+  };
+
+  /* ---------------- PERMISOS ---------------- */
+  var permisos = {
+    getMatriz: function () {
+      return apiRequest("/permisos");
     }
   };
 
@@ -277,10 +345,22 @@ Eternum.services = (function () {
     return "Otros";
   }
 
+  /** Roles con acceso a la sección administrativa. */
+  var ROLES_ADMIN = ["Root", "Administrador"];
+
+  function esAdmin(usuario) {
+    return !!usuario && ROLES_ADMIN.indexOf(usuario.rol) !== -1;
+  }
+
   return {
     USE_MOCK: USE_MOCK,
     apiClient: { request: apiRequest, base: API_BASE },
+    ROLES_ADMIN: ROLES_ADMIN,
+    esAdmin: esAdmin,
     auth: auth,
+    usuarios: usuarios,
+    permisos: permisos,
+    auditoria: auditoria,
     inventario: inventario,
     tickets: tickets,
     prestamos: prestamos,
