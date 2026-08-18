@@ -1,0 +1,433 @@
+/* =====================================================================
+   Eternum / SGRSI — Hoja de estilos fuente (Tailwind CSS v4)
+   Este archivo NO se enlaza en el HTML: se compila a assets/css/app.css.
+     npm run css        → compila una vez
+     npm run css:watch  → recompila al guardar
+   ===================================================================== */
+
+@import "tailwindcss";
+
+/* Archivos donde Tailwind busca clases utilizadas. */
+@source "../../pages/**/*.html";
+@source "../../js/**/*.js";
+@source "../../index.html";
+
+/* El modo oscuro se activa con data-theme="dark" en <html> (lo pone el JS). */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* ---------------------------------------------------------------------
+   TOKENS DE DISEÑO
+   Al ser variables CSS, basta con redefinirlas en [data-theme="dark"]
+   para que todas las utilidades (bg-superficie, text-tenue…) cambien.
+   --------------------------------------------------------------------- */
+@theme {
+  --color-primario: #1e3a8a;
+  --color-primario-oscuro: #162e6f;
+  --color-primario-suave: #eff6ff;
+
+  --color-fondo: #f1f5f9;
+  --color-superficie: #ffffff;
+  --color-borde: #e5e7eb;
+
+  --color-texto: #1a1a2e;
+  --color-tenue: #6b7280;
+  --color-debil: #9ca3af;
+
+  --color-exito: #22c55e;
+  --color-exito-suave: rgba(34, 197, 94, 0.15);
+  --color-aviso: #f59e0b;
+  --color-aviso-suave: rgba(245, 158, 11, 0.15);
+  --color-peligro: #ef4444;
+  --color-peligro-suave: rgba(239, 68, 68, 0.12);
+  --color-info: #3b82f6;
+  --color-info-suave: rgba(59, 130, 246, 0.15);
+  --color-amarillo: #eab308;
+  --color-amarillo-suave: rgba(234, 179, 8, 0.15);
+
+  --radius-tarjeta: 0.75rem;
+}
+
+[data-theme="dark"] {
+  --color-primario: #3b82f6;
+  --color-primario-oscuro: #2563eb;
+  --color-primario-suave: rgba(59, 130, 246, 0.16);
+
+  --color-fondo: #0d1117;
+  --color-superficie: #161b26;
+  --color-borde: #2a3242;
+
+  --color-texto: #e5e7eb;
+  --color-tenue: #9aa3b2;
+  --color-debil: #6b7280;
+
+  --color-peligro-suave: rgba(239, 68, 68, 0.2);
+  --color-exito-suave: rgba(34, 197, 94, 0.18);
+  --color-aviso-suave: rgba(245, 158, 11, 0.18);
+  --color-info-suave: rgba(59, 130, 246, 0.18);
+  --color-amarillo-suave: rgba(234, 179, 8, 0.18);
+}
+
+/* ---------------------------------------------------------------------
+   PREFERENCIAS DE ACCESIBILIDAD
+   --------------------------------------------------------------------- */
+@layer base {
+  /* Escala tipográfica: al mover el font-size del <html>, todas las
+     utilidades de Tailwind (que usan rem) escalan proporcionalmente. */
+  :root { --escala-fuente: 1; }
+  [data-font-size="small"]  { --escala-fuente: 0.9; }
+  [data-font-size="medium"] { --escala-fuente: 1; }
+  [data-font-size="large"]  { --escala-fuente: 1.15; }
+  [data-font-size="xl"]     { --escala-fuente: 1.3; }
+
+  html {
+    font-size: calc(16px * var(--escala-fuente));
+  }
+
+  body {
+    background-color: var(--color-fondo);
+    color: var(--color-texto);
+    font-family: Arial, Helvetica, sans-serif;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  /* Fuente pensada para dislexia. */
+  [data-dyslexic="true"] body {
+    font-family: "OpenDyslexic", "Comic Sans MS", Verdana, sans-serif;
+    letter-spacing: 0.02em;
+    line-height: 1.7;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-primario);
+    outline-offset: 2px;
+  }
+}
+
+/* ---------------------------------------------------------------------
+   COMPONENTES REUTILIZABLES
+   Se definen con @apply porque se repiten en las 10 vistas y también los
+   genera el JavaScript al renderizar listados.
+   --------------------------------------------------------------------- */
+@layer components {
+
+  /* ---- Estructura ---- */
+  .barra-lateral {
+    @apply w-60 shrink-0 flex flex-col justify-between overflow-hidden
+           rounded-2xl border border-borde bg-superficie shadow-sm
+           sticky top-0 transition-[width] duration-200;
+    height: calc(100vh - 2rem);
+  }
+  .barra-lateral.contraida { @apply w-[5.25rem]; }
+
+  .marca-lateral { @apply flex items-center gap-3 px-5 pt-6 pb-4; }
+  .barra-lateral.contraida .marca-lateral { @apply justify-center px-0; }
+  .marca-nombre { @apply text-lg font-bold text-texto whitespace-nowrap overflow-hidden transition-all; }
+  .barra-lateral.contraida .marca-nombre { @apply w-0 opacity-0; }
+
+  .nav-lateral { @apply flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-5 pb-5 pt-2; }
+  .barra-lateral.contraida .nav-lateral { @apply px-3; }
+
+  .nav-link {
+    @apply flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium
+           text-tenue no-underline whitespace-nowrap
+           transition-colors hover:bg-fondo hover:text-texto;
+  }
+  .nav-link.activo { @apply bg-primario-suave text-primario font-bold; }
+  .barra-lateral.contraida .nav-link { @apply justify-center px-3; }
+  .nav-texto { @apply overflow-hidden transition-all; }
+  .barra-lateral.contraida .nav-texto { @apply w-0 opacity-0; }
+
+  .barra-superior {
+    @apply flex items-center justify-end gap-5 rounded-[50px] border border-borde
+           bg-superficie/70 px-6 py-3.5 shadow-sm backdrop-blur-md;
+  }
+
+  /* ---- Botones ---- */
+  .btn-primario,
+  .btn-secundario,
+  .btn-peligro {
+    @apply inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border
+           border-transparent px-4 py-2.5 text-sm font-bold cursor-pointer
+           transition-all disabled:opacity-60 disabled:cursor-not-allowed;
+  }
+  .btn-primario { @apply bg-primario text-white hover:bg-primario-oscuro active:translate-y-px; }
+  .btn-secundario { @apply border-borde bg-superficie text-texto hover:bg-fondo hover:-translate-y-px; }
+  .btn-peligro { @apply bg-peligro text-white hover:brightness-90; }
+
+  .btn-icono {
+    @apply inline-flex h-9 w-9 items-center justify-center rounded-lg border
+           border-transparent text-tenue cursor-pointer transition-colors
+           hover:bg-fondo hover:text-texto;
+  }
+  .btn-icono.activo { @apply border-primario bg-primario-suave text-primario; }
+
+  /* ---- Formularios ---- */
+  .etiqueta { @apply text-[0.7rem] font-bold uppercase tracking-wider text-tenue; }
+
+  .control,
+  .control-area {
+    @apply w-full rounded-full border border-borde bg-superficie px-4 py-2.5
+           text-sm text-texto outline-none transition
+           focus:border-primario focus:ring-3 focus:ring-primario-suave;
+  }
+  .control-area { @apply rounded-xl resize-y; }
+
+  .campo { @apply flex flex-col gap-1.5; }
+  .campo.invalido .control,
+  .campo.invalido .control-area,
+  .campo.invalido input,
+  .campo.invalido select,
+  .campo.invalido textarea { @apply border-peligro; }
+  .campo-error { @apply hidden text-xs text-peligro; }
+  .campo.invalido .campo-error { @apply block; }
+
+  .error-global { @apply hidden rounded-lg bg-peligro-suave px-3.5 py-2.5 text-sm font-bold text-peligro; }
+  .error-global.visible { @apply block; }
+
+  /* ---- Superficies ---- */
+  .tarjeta { @apply rounded-xl border border-borde bg-superficie p-6 transition-colors; }
+  .tarjeta-metrica {
+    @apply flex flex-col gap-1 rounded-2xl border border-borde bg-superficie/85 p-6
+           backdrop-blur-xl transition-all hover:-translate-y-0.5
+           hover:border-primario hover:shadow-lg;
+  }
+  .metrica-etiqueta { @apply text-[0.7rem] font-bold uppercase tracking-wider text-tenue; }
+  .metrica-valor { @apply text-4xl font-bold text-texto; }
+
+  /* ---- Listados ---- */
+  .item-lista {
+    @apply flex flex-wrap items-center justify-between gap-4 rounded-xl border
+           border-borde bg-superficie px-5 py-4 transition-all
+           hover:border-primario hover:shadow-sm hover:-translate-y-px;
+  }
+  .item-lista + .item-lista { @apply mt-2.5; }
+  .item-titulo { @apply flex flex-wrap items-center gap-2 text-base font-bold text-texto; }
+  .item-meta { @apply flex flex-wrap gap-x-3 gap-y-1 text-sm text-tenue; }
+
+  .mensaje-vacio { @apply flex w-full flex-col items-center gap-2 py-10 text-center text-sm text-tenue; }
+
+  /* ---- Tablas ---- */
+  .tabla { @apply w-full border-collapse; }
+  .tabla th {
+    @apply border-b border-borde px-3 py-2.5 text-left text-[0.7rem]
+           font-bold uppercase tracking-wider text-tenue whitespace-nowrap;
+  }
+  .tabla td { @apply border-b border-borde/60 px-3 py-2.5 text-sm text-texto; }
+  .tabla tbody tr { @apply transition-colors hover:bg-fondo; }
+  .tabla tbody tr:last-child td { @apply border-b-0; }
+
+  /* ---- Insignias de estado ---- */
+  .insignia {
+    @apply inline-flex items-center gap-1.5 whitespace-nowrap rounded-full
+           px-3 py-1 text-xs font-bold;
+  }
+  .insignia::before { @apply h-1.5 w-1.5 rounded-full bg-current content-[''] ; }
+
+  .insignia-pendiente,
+  .insignia-reparacion   { @apply bg-aviso-suave text-aviso; }
+  .insignia-en_progreso,
+  .insignia-aprobado,
+  .insignia-activo       { @apply bg-info-suave text-info; }
+  .insignia-en_resolucion{ @apply bg-amarillo-suave text-yellow-700; }
+  .insignia-resuelto,
+  .insignia-devuelto,
+  .insignia-completado,
+  .insignia-operativo    { @apply bg-exito-suave text-exito; }
+  .insignia-vencido,
+  .insignia-rechazado,
+  .insignia-baja         { @apply bg-peligro-suave text-peligro; }
+
+  /* ---- Modal ---- */
+  .modal-fondo {
+    @apply fixed inset-0 z-100 flex items-center justify-center bg-black/55 p-5;
+    animation: aparecer 0.15s ease forwards;
+  }
+  .modal {
+    @apply max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl
+           bg-superficie shadow-2xl;
+    animation: surgir 0.18s ease forwards;
+  }
+  .modal-cabecera { @apply flex items-center justify-between border-b border-borde px-6 py-5; }
+  .modal-cuerpo { @apply flex flex-col gap-4 px-6 py-5; }
+  .modal-pie { @apply flex justify-end gap-2.5 px-6 pb-5 pt-4; }
+
+  /* ---- Avisos flotantes ---- */
+  .contenedor-avisos { @apply fixed bottom-5 right-5 z-200 flex flex-col gap-2.5; }
+  .aviso {
+    @apply flex min-w-60 max-w-sm items-center gap-2.5 rounded-lg border border-borde
+           border-l-4 border-l-info bg-superficie px-4 py-3 text-sm text-texto shadow-xl;
+    animation: entrar-derecha 0.2s ease;
+  }
+  .aviso.exito { @apply border-l-exito; }
+  .aviso.error { @apply border-l-peligro; }
+  .aviso.aviso-atencion { @apply border-l-aviso; }
+  .aviso.saliendo { animation: salir-derecha 0.18s ease forwards; }
+
+  /* ---- Barras de progreso ---- */
+  .barra-fondo { @apply h-1.5 overflow-hidden rounded-full bg-fondo; }
+  .barra-relleno { @apply h-full rounded-full transition-[width] duration-500; }
+
+  /* ---- Gráfica de dona (conic-gradient, sin librerías) ---- */
+  .dona { @apply relative mx-auto h-40 w-40 shrink-0 rounded-full; }
+  .dona::after {
+    @apply absolute rounded-full bg-superficie content-[''];
+    inset: 22%;
+  }
+  .dona-centro {
+    @apply absolute z-10 flex flex-col items-center justify-center text-center;
+    inset: 22%;
+  }
+
+  .punto { @apply inline-block h-2.5 w-2.5 rounded-full; }
+  .leyenda { @apply flex flex-wrap gap-4 text-sm text-tenue; }
+  .leyenda-item { @apply flex items-center gap-1.5; }
+}
+
+/* ---------------------------------------------------------------------
+   COLORES DE APOYO PARA PUNTOS Y BARRAS
+   --------------------------------------------------------------------- */
+@layer components {
+  .punto.azul,     .barra-relleno.azul     { background-color: var(--color-info); }
+  .punto.naranja,  .barra-relleno.naranja  { background-color: var(--color-aviso); }
+  .punto.amarillo, .barra-relleno.amarillo { background-color: var(--color-amarillo); }
+  .punto.verde,    .barra-relleno.verde    { background-color: var(--color-exito); }
+  .punto.rojo,     .barra-relleno.rojo     { background-color: var(--color-peligro); }
+  .punto.gris,     .barra-relleno.gris     { background-color: var(--color-debil); }
+}
+
+/* =====================================================================
+   ALTO CONTRASTE  (data-contrast="high")
+
+   IMPORTANTE: este bloque va A PROPÓSITO fuera de @layer.
+   En Tailwind v4 el CSS sin capa gana a todas las capas (base, components
+   y utilities), que es justo lo que hace falta acá: hay que pisar tanto los
+   tokens del tema como las utilidades de borde y sombra ya aplicadas a
+   .tarjeta, .item-lista, etc. Si esto viviera en @layer base, el borde de
+   1px de la capa components ganaría y el modo no se notaría.
+   ===================================================================== */
+
+/* --- Alto contraste sobre tema claro: negro puro sobre blanco puro --- */
+[data-contrast="high"] {
+  --color-fondo: #ffffff;
+  --color-superficie: #ffffff;
+  --color-texto: #000000;
+  --color-tenue: #000000;
+  --color-debil: #000000;
+  --color-borde: #000000;
+
+  --color-primario: #00308f;
+  --color-primario-oscuro: #001f5c;
+  --color-primario-suave: #d6e2ff;
+
+  /* Colores de estado oscurecidos: los originales no llegan a 4.5:1 sobre blanco. */
+  --color-exito: #04630f;
+  --color-exito-suave: #c9f2d1;
+  --color-aviso: #7a4400;
+  --color-aviso-suave: #ffe3b8;
+  --color-peligro: #9b0000;
+  --color-peligro-suave: #ffd6d6;
+  --color-info: #003d99;
+  --color-info-suave: #d6e4ff;
+  --color-amarillo: #6b5200;
+  --color-amarillo-suave: #ffeeae;
+}
+
+/* --- Alto contraste sobre tema oscuro: blanco puro sobre negro puro --- */
+[data-theme="dark"][data-contrast="high"] {
+  --color-fondo: #000000;
+  --color-superficie: #000000;
+  --color-texto: #ffffff;
+  --color-tenue: #ffffff;
+  --color-debil: #ffffff;
+  --color-borde: #ffffff;
+
+  --color-primario: #8ab4ff;
+  --color-primario-oscuro: #b8d1ff;
+  --color-primario-suave: #002b66;
+
+  --color-exito: #66f08d;
+  --color-exito-suave: #00300f;
+  --color-aviso: #ffc14d;
+  --color-aviso-suave: #3d2600;
+  --color-peligro: #ff9090;
+  --color-peligro-suave: #470000;
+  --color-info: #8ab4ff;
+  --color-info-suave: #002b66;
+  --color-amarillo: #ffe066;
+  --color-amarillo-suave: #3b2f00;
+}
+
+/* Bordes gruesos y sólidos en todas las superficies. */
+[data-contrast="high"] .tarjeta,
+[data-contrast="high"] .tarjeta-metrica,
+[data-contrast="high"] .barra-lateral,
+[data-contrast="high"] .barra-superior,
+[data-contrast="high"] .item-lista,
+[data-contrast="high"] .modal,
+[data-contrast="high"] .control,
+[data-contrast="high"] .control-area,
+[data-contrast="high"] .insignia,
+[data-contrast="high"] .btn-primario,
+[data-contrast="high"] .btn-secundario,
+[data-contrast="high"] .btn-peligro,
+[data-contrast="high"] .btn-icono {
+  border-width: 2px;
+  border-style: solid;
+  border-color: var(--color-borde);
+}
+
+/* Nada de sombras, desenfoques ni fondos translúcidos: bajan el contraste. */
+[data-contrast="high"] .tarjeta,
+[data-contrast="high"] .tarjeta-metrica,
+[data-contrast="high"] .barra-lateral,
+[data-contrast="high"] .barra-superior,
+[data-contrast="high"] .item-lista,
+[data-contrast="high"] .modal,
+[data-contrast="high"] .aviso {
+  background-color: var(--color-superficie);
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* El aviso conserva su franja lateral de color, pero con borde marcado. */
+[data-contrast="high"] .aviso {
+  border-width: 2px;
+  border-left-width: 6px;
+  border-style: solid;
+  border-color: var(--color-borde);
+}
+[data-contrast="high"] .aviso.exito { border-left-color: var(--color-exito); }
+[data-contrast="high"] .aviso.error { border-left-color: var(--color-peligro); }
+[data-contrast="high"] .aviso.aviso-atencion { border-left-color: var(--color-aviso); }
+
+/* La sección activa se distingue por borde y subrayado, no solo por color. */
+[data-contrast="high"] .nav-link.activo {
+  border: 2px solid var(--color-primario);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Filas de tabla claramente separadas. */
+[data-contrast="high"] .tabla th,
+[data-contrast="high"] .tabla td {
+  border-bottom-width: 2px;
+  border-bottom-color: var(--color-borde);
+}
+
+/* Las barras de progreso necesitan contorno para verse sobre fondo plano. */
+[data-contrast="high"] .barra-fondo {
+  border: 1px solid var(--color-borde);
+}
+
+/* Foco de teclado más visible. */
+[data-contrast="high"] :focus-visible {
+  outline: 3px solid var(--color-primario);
+  outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------- */
+@keyframes aparecer { from { opacity: 0; } to { opacity: 1; } }
+@keyframes surgir { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: none; } }
+@keyframes entrar-derecha { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: none; } }
+@keyframes salir-derecha { to { opacity: 0; transform: translateX(16px); } }

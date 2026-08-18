@@ -1,0 +1,19 @@
+# URLs limpias para la API: /api/tickets → /api/index.php?_ruta=tickets
+#
+# Esto es OPCIONAL: el frontend siempre llama a /api/index.php?_ruta=...,
+# así que el sistema funciona igual aunque mod_rewrite esté desactivado o
+# aunque se renombre la carpeta del proyecto.
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # No reescribir archivos ni carpetas que existan de verdad.
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    RewriteRule ^(.+)$ index.php?_ruta=$1 [QSA,L]
+</IfModule>
+
+# No listar el contenido del directorio.
+Options -Indexes

@@ -1,0 +1,14 @@
+{
+  "name": "eternum",
+  "version": "2.2.0",
+  "description": "SGRSI — Sistema de Gestión de Recursos del ITI CETP",
+  "private": true,
+  "scripts": {
+    "css": "tailwindcss -i assets/css/input.css -o assets/css/app.css --minify",
+    "css:watch": "tailwindcss -i assets/css/input.css -o assets/css/app.css --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "tailwindcss": "^4.3.3"
+  }
+}
