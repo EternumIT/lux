@@ -29,10 +29,12 @@
      Cerca del blanco el ojo distingue mucho peor las diferencias de luminancia
      que cerca del negro, así que el tema claro necesita MÁS separación que el
      oscuro para verse igual de definido, no la misma.
-       antes: 1.10:1 → 1.18:1  ·  ahora: 1.32:1  (el oscuro está en 1.10:1) */
-  --color-fondo: #d9e1ed;
+       1.10:1 → 1.18:1 → 1.32:1 → 1.47:1 ahora  (el oscuro está en 1.10:1)
+     El borde acompaña: con el fondo más marcado, el de antes se perdía contra
+     la tarjeta y las listas quedaban sin separación entre filas. */
+  --color-fondo: #cbd6e6;
   --color-superficie: #ffffff;
-  --color-borde: #c1cbda;
+  --color-borde: #a8b6ca;
 
   /* Los grises de texto se oscurecen en la misma proporción: sobre el fondo
      nuevo, los de antes se quedaban por debajo del mínimo AA de 4.5:1. */
@@ -94,7 +96,6 @@
   [data-font-size="small"]  { --escala-fuente: 0.9; }
   [data-font-size="medium"] { --escala-fuente: 1; }
   [data-font-size="large"]  { --escala-fuente: 1.15; }
-  [data-font-size="xl"]     { --escala-fuente: 1.3; }
 
   html {
     font-size: calc(16px * var(--escala-fuente));
@@ -146,15 +147,15 @@
     height: calc(100vh - 2rem);
     box-shadow: var(--sombra-superficie);
   }
-  .barra-lateral.contraida { @apply w-[5.25rem]; }
+  [data-sidebar="contraida"] .barra-lateral { @apply w-[5.25rem]; }
 
   .marca-lateral { @apply flex items-center gap-3 px-5 pt-6 pb-4; }
-  .barra-lateral.contraida .marca-lateral { @apply justify-center px-0; }
+  [data-sidebar="contraida"] .marca-lateral { @apply justify-center px-0; }
   .marca-nombre { @apply text-lg font-bold text-texto whitespace-nowrap overflow-hidden transition-all; }
-  .barra-lateral.contraida .marca-nombre { @apply w-0 opacity-0; }
+  [data-sidebar="contraida"] .marca-nombre { @apply w-0 opacity-0; }
 
   .nav-lateral { @apply flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-5 pb-5 pt-2; }
-  .barra-lateral.contraida .nav-lateral { @apply px-3; }
+  [data-sidebar="contraida"] .nav-lateral { @apply px-3; }
 
   .nav-link {
     @apply flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium
@@ -162,9 +163,14 @@
            transition-colors hover:bg-fondo hover:text-texto;
   }
   .nav-link.activo { @apply bg-primario-suave text-primario font-bold; }
-  .barra-lateral.contraida .nav-link { @apply justify-center px-3; }
+  [data-sidebar="contraida"] .nav-link { @apply justify-center px-3; }
   .nav-texto { @apply overflow-hidden transition-all; }
-  .barra-lateral.contraida .nav-texto { @apply w-0 opacity-0; }
+  [data-sidebar="contraida"] .nav-texto { @apply w-0 opacity-0; }
+
+  /* El botón de contraer también se dibuja según el atributo, para que su
+     texto y su flecha no cambien un instante después que el resto. */
+  [data-sidebar="contraida"] .btn-colapsar-texto { @apply hidden; }
+  [data-sidebar="contraida"] [data-icono-colapsar] { @apply rotate-180; }
 
   .barra-superior {
     @apply flex items-center justify-end gap-5 rounded-[50px] border border-borde
@@ -184,7 +190,7 @@
   .btn-secundario,
   .btn-peligro {
     @apply inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border
-           border-transparent px-4 py-2.5 text-sm font-bold cursor-pointer
+           border-transparent px-4 py-2.5 text-sm font-bold no-underline cursor-pointer
            transition-all disabled:opacity-60 disabled:cursor-not-allowed;
   }
   .btn-primario { @apply bg-primario text-white hover:bg-primario-oscuro active:translate-y-px; }
@@ -248,13 +254,53 @@
 
   .mensaje-vacio { @apply flex w-full flex-col items-center gap-2 py-10 text-center text-sm text-tenue; }
 
+  /* ---- Listados con tope y desplazamiento propio ----
+     Sin esto, un listado largo se lleva la pantalla entera y, peor, se sale de
+     su recuadro: main es un contenedor flex y sus hijos se encogen por debajo
+     de su contenido, asi que el borde de la tarjeta quedaba dibujado mas
+     arriba que las filas. Ahora el listado tiene su propia altura maxima y se
+     desplaza por dentro. */
+  .lista-scroll {
+    @apply overflow-auto overscroll-contain;
+    max-height: min(60vh, 40rem);
+  }
+
+  /* Pie del listado: cuantos se estan viendo y como pasar de pagina. */
+  .paginacion {
+    @apply mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-borde pt-3
+           text-sm text-tenue;
+  }
+  .paginacion-controles { @apply flex items-center gap-1.5; }
+  .paginacion-boton {
+    @apply inline-flex h-8 min-w-8 items-center justify-center rounded-lg border border-borde
+           bg-superficie px-2.5 text-sm text-texto cursor-pointer transition-colors
+           hover:bg-fondo disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-superficie;
+  }
+  .paginacion-pagina { @apply px-1 text-sm text-tenue; }
+  .paginacion-cantidad {
+    @apply h-8 rounded-lg border border-borde bg-superficie px-2 text-sm text-texto;
+  }
+
   /* ---- Tablas ---- */
-  .tabla { @apply w-full border-collapse; }
+  /* border-collapse: separate (y no collapse) es a proposito: con los bordes
+     colapsados, el borde inferior del encabezado desaparece apenas la fila se
+     vuelve pegajosa, porque ese borde le pertenece a la tabla y no a la celda.
+     Como todas las separaciones son bordes inferiores, no se duplica nada. */
+  .tabla { @apply w-full min-w-[38rem] border-separate border-spacing-0; }
   .tabla th {
     @apply border-b border-borde px-3 py-2.5 text-left text-[0.7rem]
            font-bold uppercase tracking-wider text-tenue whitespace-nowrap;
   }
   .tabla td { @apply border-b border-borde/60 px-3 py-2.5 text-sm text-texto; }
+
+  /* ---- Encabezado fijo al desplazar ----
+     Dentro de un listado con scroll propio, el encabezado se queda arriba: si
+     no, apenas se baja un poco ya no se sabe que columna es cual. El fondo
+     opaco es necesario para que las filas no se vean por debajo al pasar. */
+  .lista-scroll .tabla thead th {
+    @apply sticky top-0 z-10;
+    background-color: var(--color-superficie);
+  }
   .tabla tbody tr { @apply transition-colors hover:bg-fondo; }
   .tabla tbody tr:last-child td { @apply border-b-0; }
 
@@ -289,7 +335,10 @@
            bg-superficie shadow-2xl;
     animation: surgir 0.18s ease forwards;
   }
-  .modal-cabecera { @apply flex items-center justify-between border-b border-borde px-6 py-5; }
+  /* Las fichas de detalle (ticket, solicitud) llevan más contenido que un
+     formulario corto: se les da más ancho para que la línea de tiempo se lea. */
+  .modal.modal-ancho { @apply max-w-2xl; }
+  .modal-cabecera { @apply flex items-center justify-between gap-3 border-b border-borde px-6 py-5; }
   .modal-cuerpo { @apply flex flex-col gap-4 px-6 py-5; }
   .modal-pie { @apply flex justify-end gap-2.5 px-6 pb-5 pt-4; }
 
@@ -356,6 +405,55 @@
   .punto { @apply inline-block h-2.5 w-2.5 rounded-full; }
   .leyenda { @apply flex flex-wrap gap-4 text-sm text-tenue; }
   .leyenda-item { @apply flex items-center gap-1.5; }
+
+  /* ---- Accesos rápidos del inicio ----
+     Son la puerta de entrada al sistema para quien solo necesita reportar algo:
+     por eso son tarjetas grandes y con destino claro, no botones de barra. */
+  .acceso-rapido {
+    @apply flex items-center gap-3 rounded-xl border border-borde bg-superficie p-4
+           no-underline transition-all hover:-translate-y-px hover:border-primario
+           hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2
+           focus-visible:outline-primario;
+  }
+  .acceso-icono { @apply inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl; }
+  .acceso-texto { @apply flex min-w-0 flex-col gap-0.5; }
+  .acceso-titulo { @apply text-sm font-bold text-texto; }
+  .acceso-detalle { @apply text-xs text-tenue; }
+
+  /* ---- Tarjetas de carga de trabajo (inicio del personal técnico) ---- */
+  .tarjeta-cola { @apply flex flex-col gap-1 rounded-xl border border-borde bg-superficie px-4 py-3; }
+  .cola-valor { @apply text-2xl font-bold text-texto; }
+  .cola-etiqueta { @apply text-xs text-tenue; }
+
+  /* ---- Línea de tiempo (detalle de tickets y solicitudes) ----
+     La línea vertical se dibuja con un pseudo-elemento en todos los renglones
+     menos el último, para que no quede colgando bajo el último punto. */
+  .linea-tiempo { @apply m-0 flex list-none flex-col p-0; }
+  .linea-item { @apply relative flex gap-3 pb-4 pl-1 last:pb-0; }
+  .linea-item:not(:last-child)::before {
+    @apply absolute bottom-0 left-[0.56rem] top-3.5 w-px bg-borde content-[''];
+  }
+  .linea-punto {
+    @apply relative z-10 mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full bg-primario
+           ring-4 ring-superficie;
+  }
+  .linea-cuerpo { @apply flex min-w-0 flex-1 flex-col gap-0.5; }
+  .linea-cabecera { @apply flex flex-wrap items-center gap-2 text-sm font-bold text-texto; }
+  .linea-nota { @apply whitespace-pre-line break-words text-sm text-tenue; }
+  .linea-meta { @apply text-xs text-debil; }
+
+  /* ---- Ficha de detalle ---- */
+  .dato { @apply flex min-w-0 flex-col gap-0.5; }
+  .dato-etiqueta { @apply text-[0.7rem] font-bold uppercase tracking-wider text-tenue; }
+  .dato-valor { @apply break-words text-sm text-texto; }
+
+  /* El código con el que se nombra un equipo, ticket o préstamo por escrito.
+     Va en monoespaciada para que no se confundan O con 0 ni l con 1. */
+  .codigo {
+    @apply inline-flex items-center rounded-md bg-fondo px-1.5 py-0.5 font-mono
+           text-xs font-bold text-tenue;
+  }
+  .codigo-fuerte { @apply bg-primario-suave text-primario; }
 }
 
 /* ---------------------------------------------------------------------
@@ -381,24 +479,27 @@
    1px de la capa components ganaría y el modo no se notaría.
    ===================================================================== */
 
-/* --- Alto contraste sobre tema claro: negro puro sobre blanco puro --- */
+/* --- Alto contraste sobre tema claro ---
+   La idea es reforzar, no repintar: el fondo, las tarjetas y los colores de
+   estado siguen siendo los mismos, y lo que cambia es el texto (a negro), el
+   borde (a negro y más grueso) y los tonos que no llegaban al mínimo AA de
+   4.5:1 sobre blanco. Un modo de alto contraste que deja todo en blanco y
+   negro es más legible pero deja de decir lo que decía: sin el verde y el
+   rojo, un estado ya no se reconoce de un vistazo. */
 [data-contrast="high"] {
-  /* El fondo de página se deja igual que en el modo claro normal, a propósito.
-     Si acá también fuera blanco, el fondo y las tarjetas quedarían del mismo
-     color y la única separación sería el borde: se perdería la estructura de
-     la pantalla justo en el modo pensado para verla mejor. */
-  --color-fondo: #d9e1ed;
-  --color-superficie: #ffffff;
+  /* Fondo y superficie no se tocan: la separación entre la página y las
+     tarjetas es justo lo que hay que conservar. */
   --color-texto: #000000;
-  --color-tenue: #000000;
-  --color-debil: #000000;
+  --color-tenue: #1c2430;
+  --color-debil: #1c2430;
   --color-borde: #000000;
 
   --color-primario: #00308f;
   --color-primario-oscuro: #001f5c;
   --color-primario-suave: #d6e2ff;
 
-  /* Colores de estado oscurecidos: los originales no llegan a 4.5:1 sobre blanco. */
+  /* Mismos colores, oscurecidos lo justo para llegar a 4.5:1 sobre blanco:
+     siguen leyéndose como verde, ámbar, rojo y azul. */
   --color-exito: #04630f;
   --color-exito-suave: #c9f2d1;
   --color-aviso: #7a4400;
@@ -411,14 +512,21 @@
   --color-amarillo-suave: #ffeeae;
 }
 
-/* --- Alto contraste sobre tema oscuro: blanco puro sobre negro puro --- */
+/* --- Alto contraste sobre tema oscuro ---
+   Mismo criterio. Antes el fondo y las tarjetas se iban los dos a negro puro
+   y la pantalla perdía toda su estructura: no se distinguía dónde terminaba
+   una tarjeta y empezaba la página. Ahora se conserva esa diferencia y se
+   sube el contraste del texto, del borde y de los colores de estado. */
 [data-theme="dark"][data-contrast="high"] {
-  --color-fondo: #000000;
-  --color-superficie: #000000;
-  --color-texto: #ffffff;
-  --color-tenue: #ffffff;
-  --color-debil: #ffffff;
+  /* Se oscurecen un paso respecto del oscuro normal, pero mantienen entre sí
+     la misma distancia: la estructura se sigue viendo. */
+  --color-fondo: #05070b;
+  --color-superficie: #12161f;
   --color-borde: #ffffff;
+
+  --color-texto: #ffffff;
+  --color-tenue: #e6e9ef;
+  --color-debil: #e6e9ef;
 
   --color-primario: #8ab4ff;
   --color-primario-oscuro: #b8d1ff;
@@ -436,67 +544,88 @@
   --color-amarillo-suave: #3b2f00;
 }
 
-/* Bordes gruesos y sólidos en todas las superficies. */
+/* --- Bordes marcados, sin mover nada de lugar ---
+   El refuerzo NO se hace engordando el borde. Pasar de 1px a 2px parece
+   inofensivo, pero cambia el tamaño de la caja: cada tarjeta, cada botón y
+   cada insignia crecen 2px, las filas se estiran y la página entera se
+   reacomoda en el momento en que se enciende el modo. Justo a quien necesita
+   alto contraste es a quien peor le viene ese salto.
+
+   En su lugar el trazo se dibuja hacia adentro con box-shadow (y con outline
+   donde hay contenido encima que lo taparía). Ninguna de las dos participa
+   del cálculo del diseño: el modo se enciende y no se mueve un pixel. */
+
+/* Los que ya traen 1px de borde: se les pinta ese borde y se les suma un aro
+   interior, así el trazo queda de 2px sin ocupar más lugar. */
 [data-contrast="high"] .tarjeta,
 [data-contrast="high"] .tarjeta-metrica,
 [data-contrast="high"] .barra-lateral,
 [data-contrast="high"] .barra-superior,
 [data-contrast="high"] .item-lista,
-[data-contrast="high"] .modal,
+[data-contrast="high"] .acceso-rapido,
 [data-contrast="high"] .control,
 [data-contrast="high"] .control-area,
-[data-contrast="high"] .insignia,
 [data-contrast="high"] .btn-primario,
 [data-contrast="high"] .btn-secundario,
 [data-contrast="high"] .btn-peligro,
 [data-contrast="high"] .btn-icono {
-  border-width: 2px;
-  border-style: solid;
   border-color: var(--color-borde);
+  box-shadow: inset 0 0 0 1px var(--color-borde);
 }
 
-/* Nada de sombras, desenfoques ni fondos translúcidos: bajan el contraste. */
+/* Los que no tienen borde propio llevan el trazo entero como aro. */
+[data-contrast="high"] .insignia,
+[data-contrast="high"] .modal {
+  box-shadow: inset 0 0 0 2px var(--color-borde);
+}
+
+/* Nada de desenfoques ni fondos translúcidos: bajan el contraste. Las sombras
+   exteriores ya quedaron reemplazadas por el aro de arriba. */
 [data-contrast="high"] .tarjeta,
 [data-contrast="high"] .tarjeta-metrica,
 [data-contrast="high"] .barra-lateral,
 [data-contrast="high"] .barra-superior,
 [data-contrast="high"] .item-lista,
+[data-contrast="high"] .acceso-rapido,
 [data-contrast="high"] .modal,
 [data-contrast="high"] .aviso {
   background-color: var(--color-superficie);
-  box-shadow: none;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
 
-/* El aviso conserva su franja lateral de color, pero con borde marcado. */
+/* El aviso conserva su franja lateral de color y su ancho de siempre. */
 [data-contrast="high"] .aviso {
-  border-width: 2px;
-  border-left-width: 6px;
-  border-style: solid;
   border-color: var(--color-borde);
+  box-shadow: inset 0 0 0 1px var(--color-borde);
 }
 [data-contrast="high"] .aviso.exito { border-left-color: var(--color-exito); }
 [data-contrast="high"] .aviso.error { border-left-color: var(--color-peligro); }
 [data-contrast="high"] .aviso.aviso-atencion { border-left-color: var(--color-aviso); }
 
-/* La sección activa se distingue por borde y subrayado, no solo por color. */
+/* La sección activa se distingue por contorno y subrayado, no solo por color.
+   Va como outline y no como borde para que el menú no dé un salto de alto al
+   encender el modo. */
 [data-contrast="high"] .nav-link.activo {
-  border: 2px solid var(--color-primario);
+  outline: 2px solid var(--color-primario);
+  outline-offset: -2px;
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
-/* Filas de tabla claramente separadas. */
+/* Filas de tabla claramente separadas: el segundo pixel de la línea se dibuja
+   por dentro, así ninguna fila se hace más alta. */
 [data-contrast="high"] .tabla th,
 [data-contrast="high"] .tabla td {
-  border-bottom-width: 2px;
   border-bottom-color: var(--color-borde);
+  box-shadow: inset 0 -1px 0 var(--color-borde);
 }
 
-/* Las barras de progreso necesitan contorno para verse sobre fondo plano. */
+/* Las barras de progreso necesitan contorno para verse sobre fondo plano.
+   Acá va outline porque el relleno tapa cualquier sombra interior. */
 [data-contrast="high"] .barra-fondo {
-  border: 1px solid var(--color-borde);
+  outline: 1px solid var(--color-borde);
+  outline-offset: -1px;
 }
 
 /* Foco de teclado más visible. */
@@ -532,3 +661,421 @@
 @keyframes surgir { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: none; } }
 @keyframes entrar-derecha { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: none; } }
 @keyframes salir-derecha { to { opacity: 0; transform: translateX(16px); } }
+
+/* =====================================================================
+   MENÚ SEGÚN EL ROL
+
+   Va fuera de @layer para ganarle a cualquier utilidad de display que traiga
+   el marcado. El valor de data-perfil lo pone el <script> del <head> de cada
+   página, antes del primer pintado: así el usuario final nunca llega a ver
+   las secciones que no puede usar, y el personal técnico no las ve
+   desaparecer y volver mientras carga. Cuando el servidor confirma la sesión,
+   js/app.js corrige el atributo si la sesión guardada estaba equivocada.
+   ===================================================================== */
+[data-perfil="usuario"] [data-solo-personal] { display: none; }
+
+/* =====================================================================
+   PANTALLAS CHICAS
+
+   Igual que el bloque de alto contraste, esto va A PROPÓSITO fuera de
+   @layer: tiene que pisar tanto la altura fija de .barra-lateral (capa
+   components) como el ancho del menú contraído y las utilidades del HTML.
+   ===================================================================== */
+
+/* Piezas que solo existen en el teléfono. En pantalla grande no se dibujan,
+   pero están siempre en el HTML: es una sola página que se acomoda, no dos
+   páginas distintas que haya que mantener en paralelo. */
+.btn-menu,
+.btn-cerrar-menu,
+.menu-fondo { display: none; }
+
+@media (max-width: 48rem) {
+  /* ---------------------------------------------------------------
+     El menú pasa a ser un cajón que entra desde el costado.
+
+     Antes se convertía en una franja de enlaces arriba del contenido.
+     Funcionaba, pero con seis secciones ocupaba media pantalla y lo
+     primero que se veía al entrar era el menú, no el sistema. Como
+     cajón ocupa cero hasta que alguien lo pide.
+
+     Queda fuera de la pantalla con translateX y no con display:none
+     para que entre deslizándose, y para que el lector de pantalla lo
+     encuentre igual.
+     --------------------------------------------------------------- */
+  .barra-lateral {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 60;
+    height: 100%;
+    width: min(17rem, 82vw);
+    border-radius: 0 1rem 1rem 0;
+    transform: translateX(-100%);
+    transition: transform 0.22s ease;
+  }
+
+  [data-menu="abierto"] .barra-lateral { transform: translateX(0); }
+
+  /* El fondo oscuro cumple dos funciones: separa el cajón del contenido y
+     es la forma más rápida de cerrarlo, que es tocar en cualquier lado. */
+  .menu-fondo {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgb(0 0 0 / 0.5);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s ease;
+  }
+  [data-menu="abierto"] .menu-fondo { opacity: 1; pointer-events: auto; }
+
+  /* Con el cajón abierto, la página de atrás no se mueve. */
+  [data-menu="abierto"] body { overflow: hidden; }
+
+  /* El botón para abrirlo vive en la barra superior, a la izquierda del todo;
+     el de cerrarlo, arriba del propio cajón. */
+  .btn-menu { display: inline-flex; margin-right: auto; }
+  .btn-cerrar-menu { display: inline-flex; margin-left: auto; }
+
+  /* Contraer no tiene sentido en un cajón que se abre y se cierra entero. */
+  #btn-colapsar { display: none; }
+
+  /* La preferencia de menú contraído se guarda en el navegador. Sin esto,
+     quien lo dejó contraído en la computadora abría el celular y se
+     encontraba con un cajón de 5rem y los nombres de las secciones cortados. */
+  [data-sidebar="contraida"] .barra-lateral { width: min(17rem, 82vw); }
+  [data-sidebar="contraida"] .marca-nombre,
+  [data-sidebar="contraida"] .nav-texto { width: auto; opacity: 1; }
+  [data-sidebar="contraida"] .marca-lateral { padding-left: 1.25rem; justify-content: flex-start; }
+  [data-sidebar="contraida"] .nav-link { justify-content: flex-start; padding-left: 1rem; }
+  [data-sidebar="contraida"] .nav-lateral { padding-left: 1.25rem; padding-right: 1.25rem; }
+
+  /* ---------------------------------------------------------------
+     Contenido
+     --------------------------------------------------------------- */
+
+  /* Con el menú afuera del flujo, el contenido se desplaza como una página
+     normal en vez de tener su propio scroll adentro, que es lo que espera
+     cualquiera en un teléfono. */
+  main { overflow-y: visible; }
+
+  body { padding: 0.75rem; }
+
+  /* Márgenes más chicos: en 360px de ancho, 1.5rem de cada lado son 48px
+     que se le quitan al texto. */
+  .tarjeta { padding: 1rem; }
+  .item-lista { padding: 0.875rem 1rem; }
+
+  /* La barra superior se queda arriba al desplazar: es donde vive el botón
+     del menú, y si se va con el scroll hay que volver hasta arriba de una
+     lista larga solo para cambiar de sección. */
+  .barra-superior {
+    position: sticky;
+    top: 0.75rem;
+    gap: 0.5rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  /* El nombre y el rol se recortan antes: con el botón del menú al lado, un
+     nombre largo empuja la ficha del usuario fuera de la pantalla. */
+  .usuario-nombre,
+  .usuario-rol { max-width: 6rem; }
+
+  /* El encabezado de cada pantalla se apila, y su acción principal ocupa el
+     ancho completo en vez de quedar escondida en un rincón. */
+  [aria-label="Encabezado"] {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  [aria-label="Encabezado"] .btn-primario,
+  [aria-label="Encabezado"] .btn-secundario {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* ---------------------------------------------------------------
+     Tocar con el dedo
+
+     44px es el mínimo que se puede tocar sin errarle. Los botones de
+     icono y los de paginación quedaban por debajo.
+     --------------------------------------------------------------- */
+  .btn-icono { height: 2.75rem; width: 2.75rem; }
+
+  .btn-primario,
+  .btn-secundario,
+  .btn-peligro { padding-top: 0.7rem; padding-bottom: 0.7rem; }
+
+  .paginacion-boton { height: 2.5rem; min-width: 2.5rem; }
+
+  /* Las acciones de una fila ocupan el ancho completo: apretadas contra el
+     borde derecho son dos objetivos de 40px pegados uno al otro. */
+  .item-lista > div:last-child { width: 100%; }
+  .item-lista > div:last-child > .btn-primario,
+  .item-lista > div:last-child > .btn-secundario,
+  .item-lista > div:last-child > .btn-peligro { flex: 1 1 0; justify-content: center; }
+
+  /* ---------------------------------------------------------------
+     Ventanas y listados
+     --------------------------------------------------------------- */
+  .modal {
+    max-width: 100%;
+    max-height: 92vh;
+  }
+  .modal-cabecera { padding: 1rem 1.25rem; }
+  .modal-cuerpo { padding: 1rem 1.25rem; }
+  .modal-pie { padding: 0.75rem 1.25rem 1.25rem; }
+
+  /* Los dos botones del pie, del mismo ancho: alcanza con mirar sin apuntar. */
+  .modal-pie > .btn-primario,
+  .modal-pie > .btn-secundario,
+  .modal-pie > .btn-peligro { flex: 1 1 0; justify-content: center; }
+
+  /* ---------------------------------------------------------------
+     LAS TABLAS SE VUELVEN TARJETAS
+
+     Esto es lo único del sistema que en el teléfono NO es la misma
+     vista más angosta, sino otra distinta, y es a propósito.
+
+     Una tabla necesita unos 38rem para que las columnas se lean; en
+     un teléfono de 412px eso es imposible. Las dos salidas de siempre
+     son malas: encogerla parte cada celda en cuatro renglones, y
+     dejarla correr de costado obliga a arrastrar de izquierda a
+     derecha una vez por fila, perdiendo de vista el código del equipo
+     justo cuando se lo necesita para saber de qué fila se trata.
+
+     Acá cada fila pasa a ser una tarjeta: arriba lo que identifica
+     (el código, o la acción en el caso de auditoría) y su estado, y
+     debajo el resto como "etiqueta → valor". El encabezado de la
+     tabla se apaga porque cada valor ya lleva su nombre al lado.
+
+     Se hace con CSS y no armando otro HTML: el JavaScript sigue
+     dibujando una sola tabla, cada celda con su data-etiqueta. Así no
+     hay dos vistas que se puedan desincronizar cuando se agregue una
+     columna, y la página sigue siendo una tabla de verdad para el
+     lector de pantalla.
+     --------------------------------------------------------------- */
+  .tabla,
+  .tabla tbody,
+  .tabla tr,
+  .tabla td { display: block; }
+
+  /* El min-width de 38rem era lo que empujaba la tarjeta entera fuera de la
+     pantalla y hacía aparecer el desplazamiento horizontal. */
+  .tabla { width: 100%; min-width: 0; }
+
+  /* Cada valor lleva su nombre al lado; el encabezado sobra. */
+  .tabla thead { display: none; }
+
+  .tabla tbody tr {
+    display: flex;
+    flex-wrap: wrap;
+    border: 1px solid var(--color-borde);
+    border-radius: 0.75rem;
+    background-color: var(--color-superficie);
+    padding: 0.875rem 1rem;
+  }
+  .tabla tbody tr + tr { margin-top: 0.625rem; }
+
+  /* El resaltado al pasar por encima no existe con el dedo, y encendido
+     dejaba la última fila tocada de otro color. */
+  .tabla tbody tr:hover { background-color: var(--color-superficie); }
+
+  /* Una línea por dato: el nombre a la izquierda, el valor a la derecha. */
+  .tabla td {
+    display: flex;
+    flex: 0 0 100%;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    border: 0;
+    padding: 0.3rem 0;
+    text-align: left;
+  }
+  .tabla td[data-etiqueta]::before {
+    content: attr(data-etiqueta);
+    flex: 0 0 auto;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-tenue);
+  }
+
+  /* Lo que identifica a la fila y su estado comparten el renglón de arriba.
+     Van con order y no con su lugar en el HTML porque en cada tabla caen en
+     una columna distinta, y el orden de las columnas es cosa del escritorio.
+     Al no fijarles alto, los dos se estiran hasta el alto del renglón y sus
+     bordes inferiores quedan alineados aunque el título ocupe dos líneas. */
+  .tabla td.celda-titulo,
+  .tabla td.celda-insignia {
+    order: -1;
+    align-items: flex-start;
+    padding: 0 0 0.6rem;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid var(--color-borde);
+  }
+  .tabla td.celda-titulo {
+    flex: 1 1 8rem;
+    font-weight: 700;
+  }
+  .tabla td.celda-insignia {
+    flex: 0 0 auto;
+    justify-content: flex-end;
+    padding-left: 0.5rem;
+  }
+  /* Lo que puede ser largo (una falla, un detalle, quién hizo algo) no entra
+     en media línea: el nombre va arriba y el texto abajo, a todo el ancho. */
+  .tabla td.celda-bloque {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.15rem;
+  }
+
+  /* El botón de la fila, abajo y a todo el ancho, separado de los datos. */
+  .tabla td.celda-accion {
+    order: 1;
+    margin-top: 0.5rem;
+    padding: 0.75rem 0 0;
+    border-top: 1px solid var(--color-borde);
+  }
+  .tabla td.celda-accion > * { flex: 1 1 auto; justify-content: center; }
+
+  /* ---- La matriz de permisos ----
+     Acá los cuatro roles NO van uno debajo del otro. La pregunta que se le
+     hace a esta pantalla es "quién puede hacer esto", y eso se responde
+     mirando los cuatro juntos; en cuatro renglones separados hay que leerlos
+     de a uno y recordar. Además, con treinta acciones, apilarlos sumaba unos
+     seis mil píxeles de recorrido. */
+  .tabla tr.fila-permiso .celda-titulo { flex: 1 1 100%; }
+  .tabla tr.fila-permiso td[data-etiqueta] {
+    flex: 1 1 0;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.15rem 0;
+  }
+
+  /* En la matriz de permisos, el nombre del módulo separa grupos de tarjetas:
+     no es una tarjeta él mismo. */
+  .tabla tbody tr.fila-grupo {
+    border: 0;
+    background-color: transparent;
+    padding: 0;
+  }
+  .tabla tbody tr.fila-grupo + tr { margin-top: 0.5rem; }
+  .tabla tbody tr + tr.fila-grupo { margin-top: 1.5rem; }
+  .tabla tbody tr.fila-grupo td {
+    padding: 0.4rem 0.75rem;
+    border-radius: 0.5rem;
+  }
+
+  /* Con tarjetas, el listado ya no necesita su propio desplazamiento: una caja
+     que se desplaza dentro de una página que también se desplaza es la forma
+     más rápida de que el dedo mueva la que no era. */
+  .lista-scroll {
+    max-height: none;
+    overflow: visible;
+  }
+
+  /* El pie del listado en dos líneas, para que "Mostrando 1–25 de 120" no
+     empuje los botones de página fuera de la pantalla. */
+  .paginacion { justify-content: center; }
+
+  /* ---------------------------------------------------------------
+     Tarjetas de número, de a dos
+
+     Una etiqueta corta y un número no justifican el ancho entero: así,
+     cuatro de ellas se comían la primera pantalla y había que bajar
+     para llegar a lo que la página realmente muestra.
+     --------------------------------------------------------------- */
+  .tarjeta-metrica { padding: 1rem; }
+  .metrica-valor { font-size: 1.875rem; line-height: 2.25rem; }
+  .tarjeta-cola { padding: 1rem; }
+
+  /* ---------------------------------------------------------------
+     Las pestañas de administración, en un solo renglón
+
+     Con los iconos no entraban las cuatro y se partían en dos filas
+     dentro de una píldora, que quedaba como un bloque raro. Sin ellos
+     entran justas; el desplazamiento de costado queda por si alguien
+     agranda la letra.
+     --------------------------------------------------------------- */
+  .tabs-admin {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs-admin::-webkit-scrollbar { display: none; }
+  .tab-admin {
+    flex: 0 0 auto;
+    padding-left: 0.875rem;
+    padding-right: 0.875rem;
+  }
+  .tab-admin .icono-tab { display: none; }
+
+  /* Los avisos flotantes, de lado a lado y arriba del pulgar. */
+  .contenedor-avisos { left: 0.75rem; right: 0.75rem; bottom: 0.75rem; }
+  .aviso { min-width: 0; max-width: 100%; }
+}
+
+/* =====================================================================
+   BARRAS DE DESPLAZAMIENTO
+
+   Fuera de @layer, igual que los otros bloques que tienen que ganarle a las
+   utilidades. Se aplica a TODO el sistema (la página, el menú lateral, los
+   listados, los modales) para que no convivan dos estilos de barra: la del
+   navegador y la nuestra.
+
+   Van las dos formas porque ningún navegador entiende las dos: Firefox usa
+   scrollbar-width/scrollbar-color, y los basados en Chromium (incluido Brave)
+   usan ::-webkit-scrollbar. Los colores salen de las variables del tema, así
+   que la barra cambia sola con el modo oscuro y con el alto contraste.
+   ===================================================================== */
+
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-borde) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--color-borde);
+  border-radius: 9999px;
+
+  /* El borde transparente con background-clip deja la barra visualmente más
+     fina que su área de arrastre: se ve discreta pero se sigue agarrando bien
+     con el mouse. */
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-debil);
+}
+
+/* Donde se cruzan las dos barras no se dibuja nada. */
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* =====================================================================
+   LISTADOS DENTRO DE UN CONTENEDOR FLEX
+
+   main es "flex flex-col": sus hijos se encogen por debajo de su contenido si
+   no entran, y entonces el contenido se sale del recuadro (el borde de la
+   tarjeta queda dibujado más arriba que las filas). Esto se lo impide.
+   ===================================================================== */
+main > * {
+  flex-shrink: 0;
+}

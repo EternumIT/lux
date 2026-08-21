@@ -15,7 +15,6 @@ const path = require("path");
 const RAIZ = path.resolve(__dirname, "..", "..");
 
 const POR_DEFECTO = {
-  modo: "mariadb",
   servidor: { puerto: 8080, host: "127.0.0.1", abrirNavegador: true },
   baseDatos: { nombre: "eternum", importarSiFalta: true },
   mariadb: {
@@ -25,18 +24,9 @@ const POR_DEFECTO = {
     usuario: "root",
     password: ""
   },
-  xampp: {
-    raiz: "C:/xampp",
-    puerto: 3306,
-    usuario: "root",
-    password: "",
-    iniciarServicios: false
-  },
   php: { ruta: "" },
   tailwind: { compilarAlIniciar: true }
 };
-
-const MODOS = ["mariadb", "xampp"];
 
 /** Fusion recursiva: lo que venga en `encima` pisa a `base`. */
 function fusionar(base, encima) {
@@ -79,27 +69,22 @@ function cargar(sobreescrituras = {}) {
 }
 
 function validar(cfg) {
-  if (!MODOS.includes(cfg.modo)) {
-    throw new Error(
-      `modo "${cfg.modo}" no es valido. Usa uno de: ${MODOS.join(", ")}.`
-    );
-  }
   const puerto = Number(cfg.servidor.puerto);
   if (!Number.isInteger(puerto) || puerto < 1 || puerto > 65535) {
     throw new Error(`servidor.puerto debe ser un numero entre 1 y 65535 (recibido: ${cfg.servidor.puerto}).`);
   }
-  const puertoBd = Number(cfg[cfg.modo].puerto);
+  const puertoBd = Number(cfg.mariadb.puerto);
   if (!Number.isInteger(puertoBd) || puertoBd < 1 || puertoBd > 65535) {
-    throw new Error(`${cfg.modo}.puerto debe ser un numero entre 1 y 65535 (recibido: ${cfg[cfg.modo].puerto}).`);
+    throw new Error(`mariadb.puerto debe ser un numero entre 1 y 65535 (recibido: ${cfg.mariadb.puerto}).`);
   }
   if (!cfg.baseDatos.nombre || !/^[A-Za-z0-9_]+$/.test(cfg.baseDatos.nombre)) {
     throw new Error(`baseDatos.nombre debe tener solo letras, numeros o guion bajo (recibido: "${cfg.baseDatos.nombre}").`);
   }
 }
 
-/** Datos de conexion efectivos segun el modo elegido. */
+/** Datos de conexion a la base del proyecto. */
 function conexion(cfg) {
-  const seccion = cfg[cfg.modo];
+  const seccion = cfg.mariadb;
   return {
     host: "127.0.0.1",
     puerto: Number(seccion.puerto),
@@ -109,4 +94,4 @@ function conexion(cfg) {
   };
 }
 
-module.exports = { cargar, conexion, RAIZ, MODOS };
+module.exports = { cargar, conexion, RAIZ };

@@ -3,7 +3,6 @@
  *
  * Los datos de conexion a la base se le pasan al proceso de PHP como variables
  * de entorno. api/config.php ya las lee, asi que no hace falta tocar ningun
- * archivo PHP para cambiar de MariaDB propio a XAMPP.
  */
 const fs = require("fs");
 const path = require("path");
@@ -14,7 +13,7 @@ const { puertoAbierto, esperarPuerto } = require("./basedatos");
 const ES_WINDOWS = process.platform === "win32";
 const EXE = ES_WINDOWS ? ".exe" : "";
 
-/** Localiza el interprete de PHP: configuracion -> PATH -> XAMPP. */
+/** Localiza el interprete de PHP: primero la configuracion, despues el PATH. */
 function resolverPhp(cfg) {
   const explicita = cfg.php.ruta;
   if (explicita) {
@@ -32,10 +31,6 @@ function resolverPhp(cfg) {
     const primera = String(r.stdout).split(/\r?\n/).find((l) => l.trim());
     if (primera) return primera.trim();
   }
-
-  // XAMPP trae su propio PHP, util si el grupo lo tenia instalado.
-  const desdeXampp = path.join(cfg.xampp.raiz, "php", "php" + EXE);
-  if (fs.existsSync(desdeXampp)) return desdeXampp;
 
 
   throw new Error(
@@ -136,7 +131,11 @@ async function iniciarWeb(cfg, conn) {
 
   log("Levantando el servidor web en el puerto " + puerto + " ...");
 
-  const proceso = spawn(php, ["-S", host + ":" + puerto, "-t", cfg.raiz], {
+  // El enrutador sirve los archivos estaticos con Cache-Control: no-store, para
+  // que el navegador no mezcle codigo viejo con nuevo mientras se trabaja.
+  const router = path.join(__dirname, "..", "router.php");
+
+  const proceso = spawn(php, ["-S", host + ":" + puerto, "-t", cfg.raiz, router], {
     cwd: cfg.raiz,
     stdio: ["ignore", "pipe", "pipe"],
     env: Object.assign({}, process.env, {

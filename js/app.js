@@ -8,7 +8,21 @@
   var utils = Eternum.utils;
 
   /** Páginas que solo pueden ver Root y Administrador. */
-  var PAGINAS_ADMIN = ["administracion", "usuarios", "permisos", "auditoria"];
+  var PAGINAS_ADMIN = ["admin", "usuarios", "permisos", "auditoria"];
+
+  /**
+   * Páginas del personal del área (Root, Administrador, Técnico).
+   * El usuario final no las ve en el menú y tampoco puede entrar escribiendo
+   * la dirección: se lo devuelve al inicio. Los datos, igual, los protege la
+   * API por su cuenta.
+   */
+  var PAGINAS_PERSONAL = [
+    "inventario",
+    "estado",
+    "prestamos",
+    "nuevo-equipo",
+    "nuevo-componente"
+  ];
 
   /** Páginas que se ven sin sesión iniciada. */
   var PAGINAS_PUBLICAS = ["login"];
@@ -47,11 +61,46 @@
   }
 
   /**
+   * Marca el rol en el documento.
+   *
+   * De acá salen dos cosas: el menú lateral, que se recorta por CSS
+   * (`[data-perfil="usuario"] [data-solo-personal]` en input.css), y las
+   * pantallas que se dibujan distinto según quién entró.
+   *
+   * El atributo ya viene puesto por el <script> del <head>, que lo resuelve
+   * con la sesión guardada antes del primer pintado para que el menú no
+   * parpadee. Acá solo se corrige si el servidor dice otra cosa.
+   */
+  function marcarRol(usuario) {
+    var perfil = Eternum.services.sesion.esPersonal(usuario) ? "personal" : "usuario";
+    var rol = usuario ? usuario.rol : "";
+
+    document.documentElement.setAttribute("data-perfil", perfil);
+    document.body.setAttribute("data-perfil", perfil);
+    document.body.setAttribute("data-rol", rol);
+  }
+
+  /**
+   * Deja la pantalla mostrando a quien el servidor dice que entró.
+   *
+   * Es el único punto donde se aplica la sesión confirmada: la barra superior,
+   * el menú y el rol del <body>. Además avisa a la pantalla que esté abierta,
+   * por si muestra datos del usuario (el perfil, por ejemplo).
+   */
+  function aplicarSesion(usuario) {
+    mostrarSeccionAdmin(Eternum.services.sesion.esAdmin(usuario));
+    marcarRol(usuario);
+    Eternum.components.sidebar.pintarUsuario(usuario);
+
+    document.dispatchEvent(new CustomEvent("eternum:sesion", { detail: usuario }));
+  }
+
+  /**
    * Control de acceso del lado del navegador.
    *
    * Esto es solo comodidad visual: evita mostrar opciones que no se pueden usar.
    * La seguridad real está en el servidor, que vuelve a comprobar el rol en cada
-   * endpoint (api/sesion.php). Aunque alguien edite el localStorage y entre a la
+   * endpoint (api/services/Sesion.php). Aunque alguien edite el localStorage y entre a la
    * página a mano, la API le va a responder 403 y no verá ningún dato.
    */
   function aplicarControlDeAcceso() {
@@ -64,26 +113,35 @@
     }
 
     var esPaginaAdmin = PAGINAS_ADMIN.indexOf(pagina) !== -1;
+    var esPaginaPersonal = PAGINAS_PERSONAL.indexOf(pagina) !== -1;
 
     // Primero se pinta con lo que haya en localStorage, para no parpadear.
-    var sesionLocal = Eternum.services.auth.getSession();
-    mostrarSeccionAdmin(Eternum.services.esAdmin(sesionLocal));
+    marcarRol(Eternum.services.sesion.actual());
 
-    // Y después se confirma contra el servidor.
-    return Eternum.services.auth.verificarSesion().then(function (usuario) {
-      var admin = Eternum.services.esAdmin(usuario);
-      mostrarSeccionAdmin(admin);
+    // Y después se confirma contra el servidor, que es lo que vale: si la
+    // sesión guardada era de otra persona (o ya no existe), acá se corrige.
+    return Eternum.services.sesion.verificar().then(function (usuario) {
+      aplicarSesion(usuario);
 
       if (!usuario) {
-        redirigir("../auth/login.html", "Iniciá sesión para continuar.", "aviso");
+        redirigir("/login/", "Iniciá sesión para continuar.", "aviso");
         return null;
       }
 
-      if (esPaginaAdmin && !admin) {
+      if (esPaginaAdmin && !Eternum.services.sesion.esAdmin(usuario)) {
         redirigir(
-          "../dashboard/dashboard.html",
+          "/dashboard/",
           "No tenés permiso para entrar a la sección de administración.",
           "error"
+        );
+        return null;
+      }
+
+      if (esPaginaPersonal && !Eternum.services.sesion.esPersonal(usuario)) {
+        redirigir(
+          "/dashboard/",
+          "Esa sección es del equipo técnico. Desde el inicio podés ver el estado de los equipos.",
+          "aviso"
         );
         return null;
       }

@@ -30,7 +30,7 @@
       btn.disabled = true;
       btn.textContent = "Guardando...";
 
-      Eternum.services.inventario.createEquipo({
+      Eternum.services.inventario.crearEquipo({
         tipo: utils.qs("#tipo", form).value,
         ubicacion: utils.qs("#ubicacion", form).value,
         marca: marca.value.trim(),
@@ -40,7 +40,7 @@
         fallas: utils.qs("#fallas", form).value.trim()
       }).then(function () {
         utils.storageSet("eternum:flash", { type: "exito", message: "Equipo agregado al inventario." });
-        window.location.href = "../inventario/inventario.html";
+        window.location.href = "/inventario/";
       }).catch(function (err) {
         btn.disabled = false;
         btn.textContent = "Guardar";

@@ -30,17 +30,18 @@
       btn.disabled = true;
       btn.textContent = "Guardando...";
 
-      Eternum.services.inventario.createComponente({
+      Eternum.services.inventario.crearComponente({
         nombre: nombre.value.trim(),
         modelo: modelo.value.trim(),
         fabricante: fabricante.value.trim(),
+        ubicacion: utils.qs("#ubicacion-componente", form).value,
         serie: utils.qs("#serie", form).value.trim(),
         partNumber: utils.qs("#part-number", form).value.trim(),
         esFabrica: utils.qs('[name="es_fabrica"]', form).checked,
         funcionando: utils.qs('[name="funcionando"]', form).checked
       }).then(function () {
         utils.storageSet("eternum:flash", { type: "exito", message: "Componente agregado al inventario." });
-        window.location.href = "../inventario/inventario.html";
+        window.location.href = "/inventario/";
       }).catch(function (err) {
         btn.disabled = false;
         btn.textContent = "Guardar";

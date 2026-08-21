@@ -2,18 +2,38 @@
 /**
  * Punto de entrada de la API del SGRSI.
  *
- * Enruta las peticiones a los controladores de api/controllers/.
- * Funciona tanto con la reescritura de .htaccess (/api/tickets) como sin
- * ella usando PATH_INFO (/api/index.php/tickets).
+ * El sistema está separado en tres capas, y este archivo es el único que las
+ * conoce a las tres:
+ *
+ *   controllers/   presentación: leen la petición y devuelven JSON. Sin reglas.
+ *   http/          las piezas de esa capa que hablan el protocolo.
+ *   services/      negocio: permisos, validaciones, códigos, historial.
+ *                  No sabe qué es una petición ni qué es SQL.
+ *   repositories/  datos: lo único que escribe SQL. No sabe quién pregunta.
+ *   helpers/       piezas que usan todas las capas.
+ *
+ * La dirección de las dependencias va siempre hacia abajo: los controladores
+ * usan servicios, los servicios usan repositorios, y nunca al revés. Por eso
+ * una regla se puede cambiar sin tocar consultas, y una consulta sin tocar
+ * reglas.
  */
 
 declare(strict_types=1);
 
-require __DIR__ . '/helpers.php';
-require __DIR__ . '/db.php';
-require __DIR__ . '/sesion.php';
-require __DIR__ . '/permisos.php';
-require __DIR__ . '/auditoria.php';
+/*
+ * Autocarga: el nombre de la clase es el nombre del archivo, y se busca en las
+ * carpetas de cada capa. Evita una lista de require en cada archivo, que es
+ * justo lo que se desordena cuando el proyecto crece.
+ */
+spl_autoload_register(static function (string $clase): void {
+    foreach (['helpers', 'repositories', 'services', 'http', 'controllers'] as $capa) {
+        $archivo = __DIR__ . '/' . $capa . '/' . $clase . '.php';
+        if (is_file($archivo)) {
+            require_once $archivo;
+            return;
+        }
+    }
+});
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -58,109 +78,89 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PATCH, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 
-if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'OPTIONS') {
+if (Peticion::metodo() === 'OPTIONS') {
     http_response_code(204);
     exit;
 }
 
-/** Determina la ruta solicitada, sin el prefijo del directorio de la API. */
-function resolver_ruta(): string
-{
-    // Con .htaccess la ruta viaja en ?_ruta=...; sin él, en PATH_INFO.
-    if (isset($_GET['_ruta']) && $_GET['_ruta'] !== '') {
-        return '/' . trim((string) $_GET['_ruta'], '/');
+/* ---------------------------------------------------------------------
+ * Tabla de rutas: dirección  =>  [controlador, método]
+ * ------------------------------------------------------------------- */
+
+$enrutador = new Enrutador();
+$enrutador->agregarVarias([
+    'POST /auth/login'     => [ControladorAuth::class, 'login'],
+    'GET /auth/sesion'     => [ControladorAuth::class, 'sesion'],
+    'POST /auth/logout'    => [ControladorAuth::class, 'logout'],
+    'PATCH /auth/password' => [ControladorAuth::class, 'cambiarPassword'],
+
+    // Sección administrativa: el rol lo comprueba cada servicio.
+    'GET /auditoria' => [ControladorAuditoria::class, 'listar'],
+    'GET /permisos'  => [ControladorAuditoria::class, 'permisos'],
+
+    'GET /usuarios'                => [ControladorUsuarios::class, 'listar'],
+    'POST /usuarios'               => [ControladorUsuarios::class, 'crear'],
+    'PATCH /usuarios/{id}'         => [ControladorUsuarios::class, 'actualizar'],
+    'PATCH /usuarios/{id}/bloqueo' => [ControladorUsuarios::class, 'cambiarBloqueo'],
+
+    // Lista mínima de nombres, para elegir a quién sumar a un ticket.
+    // La puede pedir cualquiera con sesión iniciada; no expone datos privados.
+    'GET /directorio' => [ControladorUsuarios::class, 'directorio'],
+
+    'GET /equipos'      => [ControladorInventario::class, 'listarEquipos'],
+    'POST /equipos'     => [ControladorInventario::class, 'crearEquipo'],
+    'GET /componentes'  => [ControladorInventario::class, 'listarComponentes'],
+    'POST /componentes' => [ControladorInventario::class, 'crearComponente'],
+
+    'GET /tickets'        => [ControladorTickets::class, 'listar'],
+    'POST /tickets'       => [ControladorTickets::class, 'crear'],
+    'GET /tickets/{id}'   => [ControladorTickets::class, 'detalle'],
+    'PATCH /tickets/{id}' => [ControladorTickets::class, 'cambiarEstado'],
+
+    'GET /solicitudes'        => [ControladorSolicitudes::class, 'listar'],
+    'POST /solicitudes'       => [ControladorSolicitudes::class, 'crear'],
+    'GET /solicitudes/{id}'   => [ControladorSolicitudes::class, 'detalle'],
+    'PATCH /solicitudes/{id}' => [ControladorSolicitudes::class, 'cambiarEstado'],
+
+    'GET /prestamos'        => [ControladorPrestamos::class, 'listar'],
+    'POST /prestamos'       => [ControladorPrestamos::class, 'crear'],
+    'GET /prestamos/{id}'   => [ControladorPrestamos::class, 'detalle'],
+    'PATCH /prestamos/{id}' => [ControladorPrestamos::class, 'cambiarEstado'],
+
+    'GET /inicio'    => [ControladorResumenes::class, 'inicio'],
+    'GET /dashboard' => [ControladorResumenes::class, 'panel'],
+]);
+
+/* ---------------------------------------------------------------------
+ * Ejecución
+ *
+ * Es el único lugar donde los errores de las capas de abajo se traducen a
+ * códigos HTTP. Por eso ni los servicios ni los repositorios necesitan saber
+ * qué es un 404.
+ * ------------------------------------------------------------------- */
+
+$ruta   = Peticion::ruta();
+$metodo = Peticion::metodo();
+
+try {
+    $respuesta = $enrutador->resolver($metodo, $ruta);
+
+    if ($respuesta !== null) {
+        $respuesta->enviar();
     }
 
-    if (isset($_SERVER['PATH_INFO']) && $_SERVER['PATH_INFO'] !== '') {
-        return '/' . trim($_SERVER['PATH_INFO'], '/');
+    if ($ruta === '/' || $ruta === '') {
+        Respuesta::ok([
+            'nombre' => 'API SGRSI / Eternum',
+            'estado' => 'ok',
+            'capas'  => ['controllers', 'services', 'repositories'],
+            'rutas'  => $enrutador->definiciones(),
+        ])->enviar();
     }
 
-    // Último recurso: se recorta el directorio del script del REQUEST_URI.
-    $uri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
-    $base = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '')), '/');
-    if ($base !== '' && str_starts_with($uri, $base)) {
-        $uri = substr($uri, strlen($base));
-    }
-    $uri = preg_replace('#^/index\.php#', '', $uri) ?? $uri;
-
-    return '/' . trim($uri, '/');
+    Respuesta::error('Ruta no encontrada: ' . $metodo . ' ' . $ruta, 404)->enviar();
+} catch (ErrorDeNegocio $e) {
+    Respuesta::error($e->getMessage(), $e->estado())->enviar();
+} catch (ErrorDeConexion $e) {
+    Respuesta::error($e->getMessage(), 500, array_merge(['ayuda' => $e->ayuda()], $e->extra()))->enviar();
 }
-
-$ruta   = resolver_ruta();
-$metodo = $_SERVER['REQUEST_METHOD'] ?? 'GET';
-
-// Tabla de rutas: 'METODO /ruta' => [archivo del controlador, función]
-$rutas = [
-    'POST /auth/login'      => ['auth.php',        'auth_login'],
-    'GET /auth/sesion'      => ['auth.php',        'auth_sesion'],
-    'POST /auth/logout'     => ['auth.php',        'auth_logout'],
-
-    // Sección administrativa: los controladores comprueban el rol.
-    'GET /auditoria'        => ['auditoria.php',   'auditoria_listar'],
-    'GET /usuarios'         => ['usuarios.php',    'usuarios_listar'],
-    'POST /usuarios'        => ['usuarios.php',    'usuarios_crear'],
-
-    'GET /equipos'          => ['equipos.php',     'equipos_listar'],
-    'POST /equipos'         => ['equipos.php',     'equipos_crear'],
-
-    'GET /componentes'      => ['componentes.php', 'componentes_listar'],
-    'POST /componentes'     => ['componentes.php', 'componentes_crear'],
-
-    'GET /tickets'          => ['tickets.php',     'tickets_listar'],
-    'POST /tickets'         => ['tickets.php',     'tickets_crear'],
-
-    'GET /prestamos'        => ['prestamos.php',   'prestamos_listar'],
-    'POST /prestamos'       => ['prestamos.php',   'prestamos_crear'],
-
-    'GET /solicitudes'      => ['solicitudes.php', 'solicitudes_listar'],
-    'POST /solicitudes'     => ['solicitudes.php', 'solicitudes_crear'],
-
-    'GET /dashboard'        => ['dashboard.php',   'dashboard_resumen'],
-];
-
-// permisos_listar vive en permisos.php, que ya está cargado más arriba.
-$rutasDirectas = [
-    'GET /permisos' => 'permisos_listar',
-];
-
-// Rutas con parámetro en la URL: 'METODO patrón' => [archivo, función]
-$rutasConId = [
-    'PATCH #^/tickets/(\d+)$#'          => ['tickets.php',   'tickets_actualizar_estado'],
-    'PATCH #^/prestamos/(\d+)$#'        => ['prestamos.php', 'prestamos_actualizar_estado'],
-    'PATCH #^/usuarios/(\d+)$#'         => ['usuarios.php',  'usuarios_actualizar'],
-    'PATCH #^/usuarios/(\d+)/bloqueo$#' => ['usuarios.php',  'usuarios_cambiar_bloqueo'],
-];
-
-$clave = $metodo . ' ' . $ruta;
-
-if (isset($rutasDirectas[$clave])) {
-    $rutasDirectas[$clave]();
-    exit;
-}
-
-if (isset($rutas[$clave])) {
-    [$archivo, $funcion] = $rutas[$clave];
-    require_once __DIR__ . '/controllers/' . $archivo;
-    $funcion();
-    exit;
-}
-
-foreach ($rutasConId as $patron => $destino) {
-    [$metodoPatron, $regex] = explode(' ', $patron, 2);
-    if ($metodo === $metodoPatron && preg_match($regex, $ruta, $coincidencias)) {
-        [$archivo, $funcion] = $destino;
-        require_once __DIR__ . '/controllers/' . $archivo;
-        $funcion((int) $coincidencias[1]);
-        exit;
-    }
-}
-
-if ($ruta === '/' || $ruta === '') {
-    json_response([
-        'nombre'  => 'API SGRSI / Eternum',
-        'estado'  => 'ok',
-        'rutas'   => array_merge(array_keys($rutas), array_keys($rutasDirectas)),
-    ]);
-}
-
-json_error('Ruta no encontrada: ' . $metodo . ' ' . $ruta, 404);

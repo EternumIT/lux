@@ -1,9 +1,10 @@
 /* Lógica de la pantalla de Inventario (equipos + componentes). */
 (function () {
   var utils = Eternum.utils;
-  var svc = Eternum.services.inventario;
 
-  var ESTADO_EQUIPO = { operativo: "Operativo", reparacion: "En reparación", baja: "De baja" };
+  // Las reglas (qué se busca, qué cuenta como problema) viven en negocio.
+  var negocio = Eternum.services.inventario;
+  var ESTADO_EQUIPO = negocio.ESTADOS_EQUIPO;
 
   document.addEventListener("DOMContentLoaded", function () {
     var panelEquipos = utils.qs("#tab-equipos");
@@ -23,26 +24,15 @@
     }
 
     function filtrarEquipos() {
-      var texto = (buscador.value || "").toLowerCase().trim();
-      var estado = selEstado.value;
-      var ubicacion = selUbicacion.value;
-
-      return equipos.filter(function (eq) {
-        var coincideTexto = !texto ||
-          (eq.marca + " " + eq.modelo + " " + eq.serie).toLowerCase().indexOf(texto) !== -1;
-        return coincideTexto &&
-          (!estado || eq.estado === estado) &&
-          (!ubicacion || eq.ubicacion === ubicacion);
+      return negocio.filtrarEquipos(equipos, {
+        texto: buscador.value,
+        estado: selEstado.value,
+        ubicacion: selUbicacion.value
       });
     }
 
     function filtrarComponentes() {
-      var texto = (buscador.value || "").toLowerCase().trim();
-      return componentes.filter(function (co) {
-        return !texto ||
-          (co.nombre + " " + co.modelo + " " + co.fabricante + " " + (co.serie || ""))
-            .toLowerCase().indexOf(texto) !== -1;
-      });
+      return negocio.filtrarComponentes(componentes, { texto: buscador.value });
     }
 
     function tabla(encabezados, filas) {
@@ -54,54 +44,71 @@
     }
 
     function renderEquipos(lista) {
-      if (!lista.length) {
-        panelEquipos.innerHTML =
-          '<p class="mensaje-vacio">' + Eternum.iconos.svg("inventario", "icono-vacio") + 'No se encontraron equipos</p>';
-        return;
-      }
+      Eternum.components.listado.render({
+        contenedor: panelEquipos,
+        items: lista,
+        vacio: { icono: "inventario", mensaje: "No se encontraron equipos" },
+        contenido: function (visibles) {
+          var filas = visibles.map(function (eq) {
+            return "<tr>" +
+              '<td class="celda-titulo"><span class="codigo codigo-fuerte">' +
+                utils.escapeHtml(eq.codigo) + "</span></td>" +
+              '<td data-etiqueta="Tipo">' + utils.escapeHtml(eq.tipo) + "</td>" +
+              '<td data-etiqueta="Marca / Modelo">' +
+                utils.escapeHtml(eq.marca + " " + eq.modelo) + "</td>" +
+              '<td data-etiqueta="N° de serie">' + utils.escapeHtml(eq.serie) + "</td>" +
+              '<td data-etiqueta="Ubicación">' + utils.escapeHtml(eq.ubicacion) + "</td>" +
+              '<td class="celda-insignia">' +
+                insignia(eq.estado, ESTADO_EQUIPO[eq.estado] || eq.estado) + "</td>" +
+            "</tr>";
+          }).join("");
 
-      var filas = lista.map(function (eq) {
-        return "<tr>" +
-          "<td>" + utils.escapeHtml(eq.tipo) + "</td>" +
-          "<td>" + utils.escapeHtml(eq.marca + " " + eq.modelo) + "</td>" +
-          "<td>" + utils.escapeHtml(eq.serie) + "</td>" +
-          "<td>" + utils.escapeHtml(eq.ubicacion) + "</td>" +
-          "<td>" + insignia(eq.estado, ESTADO_EQUIPO[eq.estado] || eq.estado) + "</td>" +
-        "</tr>";
-      }).join("");
-
-      panelEquipos.innerHTML = tabla(
-        ["Tipo", "Marca / Modelo", "N° de serie", "Ubicación", "Estado"], filas
-      );
+          return tabla(
+            ["Código", "Tipo", "Marca / Modelo", "N° de serie", "Ubicación", "Estado"], filas
+          );
+        }
+      });
     }
 
     function renderComponentes(lista) {
-      if (!lista.length) {
-        panelComponentes.innerHTML =
-          '<p class="mensaje-vacio">' + Eternum.iconos.svg("componente", "icono-vacio") + 'No se encontraron componentes</p>';
-        return;
-      }
+      Eternum.components.listado.render({
+        contenedor: panelComponentes,
+        items: lista,
+        vacio: { icono: "componente", mensaje: "No se encontraron componentes" },
+        contenido: function (visibles) {
+          var filas = visibles.map(function (co) {
+            return "<tr>" +
+              '<td class="celda-titulo"><span class="codigo codigo-fuerte">' +
+                utils.escapeHtml(co.codigo) + "</span></td>" +
+              '<td data-etiqueta="Nombre">' + utils.escapeHtml(co.nombre) + "</td>" +
+              '<td data-etiqueta="Modelo">' + utils.escapeHtml(co.modelo) + "</td>" +
+              '<td data-etiqueta="Fabricante">' + utils.escapeHtml(co.fabricante) + "</td>" +
+              '<td data-etiqueta="N° de serie">' + utils.escapeHtml(co.serie || "—") + "</td>" +
+              '<td class="celda-insignia">' + (co.funcionando
+                ? insignia("operativo", "Funcionando")
+                : insignia("baja", "Con falla")) + "</td>" +
+            "</tr>";
+          }).join("");
 
-      var filas = lista.map(function (co) {
-        return "<tr>" +
-          "<td>" + utils.escapeHtml(co.nombre) + "</td>" +
-          "<td>" + utils.escapeHtml(co.modelo) + "</td>" +
-          "<td>" + utils.escapeHtml(co.fabricante) + "</td>" +
-          "<td>" + utils.escapeHtml(co.serie || "—") + "</td>" +
-          "<td>" + (co.funcionando
-            ? insignia("operativo", "Funcionando")
-            : insignia("baja", "Con falla")) + "</td>" +
-        "</tr>";
-      }).join("");
-
-      panelComponentes.innerHTML = tabla(
-        ["Nombre", "Modelo", "Fabricante", "N° de serie", "Estado"], filas
-      );
+          return tabla(
+            ["Código", "Nombre", "Modelo", "Fabricante", "N° de serie", "Estado"], filas
+          );
+        }
+      });
     }
 
-    function refrescar() {
+    function refrescar(desdeFiltro) {
+      if (desdeFiltro) {
+        Eternum.components.listado.reiniciar(panelEquipos);
+        Eternum.components.listado.reiniciar(panelComponentes);
+      }
       renderEquipos(filtrarEquipos());
       renderComponentes(filtrarComponentes());
+    }
+
+    /** Un filtro nuevo empieza desde la primera página. */
+    function refrescarDesdeFiltro() {
+      refrescar(true);
     }
 
     function cambiarTab(nombre) {
@@ -118,11 +125,11 @@
       });
     });
 
-    utils.on(buscador, "input", utils.debounce(refrescar, 200));
-    utils.on(selEstado, "change", refrescar);
-    utils.on(selUbicacion, "change", refrescar);
+    utils.on(buscador, "input", utils.debounce(refrescarDesdeFiltro, 200));
+    utils.on(selEstado, "change", refrescarDesdeFiltro);
+    utils.on(selUbicacion, "change", refrescarDesdeFiltro);
 
-    Promise.all([svc.getEquipos(), svc.getComponentes()]).then(function (res) {
+    Promise.all([negocio.equipos(), negocio.componentes()]).then(function (res) {
       equipos = res[0];
       componentes = res[1];
 

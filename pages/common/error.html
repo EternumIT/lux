@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SGRSI — Error</title>
+  <script>
+    (function () {
+      try {
+        var p = JSON.parse(localStorage.getItem("eternum:prefs") || "{}");
+        var prefiereOscuro = window.matchMedia &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches;
+        var raiz = document.documentElement;
+        raiz.setAttribute("data-theme", p.theme || (prefiereOscuro ? "dark" : "light"));
+        raiz.setAttribute("data-font-size", p.fontSize || "medium");
+        raiz.setAttribute("data-contrast", p.highContrast ? "high" : "normal");
+        raiz.setAttribute("data-dyslexic", p.dyslexic ? "true" : "false");
+      } catch (e) {
+        /* Si el localStorage no está disponible se sigue con el tema por defecto. */
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+</head>
+<!-- No lleva data-page a propósito: esta pantalla no pasa por el control de
+     acceso de js/app.js. Si lo hiciera, un error de sesión terminaría en el
+     login y nunca se vería lo que pasó. -->
+<body class="flex min-h-screen items-center justify-center p-4">
+
+  <main class="tarjeta flex w-full max-w-md flex-col items-center gap-6 px-8 py-12 text-center">
+
+    <img src="/assets/img/logo.png" alt="SGRSI" class="h-10 w-10 rounded-[10px]">
+
+    <div class="flex flex-col items-center gap-3">
+      <p class="font-mono text-6xl font-bold leading-none text-peligro" id="codigo">—</p>
+      <h1 class="text-lg font-bold text-texto" id="titulo">Error</h1>
+      <p class="max-w-xs text-sm text-tenue" id="mensaje">Se produjo un error.</p>
+    </div>
+
+    <a class="btn-primario" href="/dashboard/" id="accion">Ir al inicio</a>
+
+  </main>
+
+  <!-- Utilidades compartidas -->
+  <script src="/js/utils/utils.js" defer></script>
+
+  <!-- components y pages: capa de presentacion -->
+  <script src="/js/pages/error.js" defer></script>
+
+</body>
+</html>

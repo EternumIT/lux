@@ -4,12 +4,9 @@
     "copia este archivo a 'eternum.config.local.json' y edita ahi: ese archivo",
     "no se sube al repositorio y pisa los valores de este.",
     "",
-    "modo: 'mariadb' -> el comando levanta su propia base de datos (no hace",
-    "                   falta instalar XAMPP, solo tener MariaDB).",
-    "      'xampp'   -> usa el MySQL/MariaDB que ya corre en XAMPP."
+    "El comando levanta su propia base MariaDB sobre database/datos, asi que",
+    "no hace falta instalar ni configurar nada mas: solo tener MariaDB y PHP."
   ],
-
-  "modo": "mariadb",
 
   "servidor": {
     "puerto": 8080,
@@ -28,14 +25,6 @@
     "puerto": 3307,
     "usuario": "root",
     "password": ""
-  },
-
-  "xampp": {
-    "raiz": "C:/xampp",
-    "puerto": 3306,
-    "usuario": "root",
-    "password": "",
-    "iniciarServicios": false
   },
 
   "php": {

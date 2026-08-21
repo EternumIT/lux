@@ -1,0 +1,63 @@
+# =====================================================================
+# Direcciones limpias para Apache.
+#
+# El sistema se sirve con direcciones como /tickets/ en vez de
+# /pages/common/tickets.html. Con "npm run main" esto lo resuelve
+# scripts/router.php; cuando el sitio lo sirve Apache (el servidor Ubuntu de
+# la entrega, por ejemplo), lo resuelve este archivo.
+#
+# Las carpetas de pages/ agrupan por quien puede entrar (admin, tecnico,
+# common). Ese agrupamiento ordena los archivos, no las direcciones:
+#
+#   pages/common/tickets.html     -> /tickets/
+#   pages/tecnico/inventario.html -> /inventario/
+#   pages/admin/admin.html        -> /admin/         (admin es una seccion:
+#   pages/admin/usuarios.html     -> /admin/usuarios/   sus pantallas cuelgan de ella)
+#
+# Las reglas estan escritas una por una porque Apache no admite comodines en
+# el destino de RewriteRule. Al agregar una pantalla nueva hay que sumar su
+# linea aca (con "npm run main" no hace falta: alli la regla es generica).
+#
+# IMPORTANTE: da por sentado que el proyecto es la raiz del sitio. Si se
+# sirve desde una subcarpeta (http://localhost/eternum/), hay que descomentar
+# RewriteBase y ajustar las rutas absolutas de las paginas.
+# =====================================================================
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # RewriteBase /
+
+  # Lo que existe de verdad (assets, js, la API) se sirve tal cual.
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  RewriteRule ^admin/?$ pages/admin/admin.html [L,QSA]
+  RewriteRule ^admin/auditoria/?$ pages/admin/auditoria.html [L,QSA]
+  RewriteRule ^admin/permisos/?$ pages/admin/permisos.html [L,QSA]
+  RewriteRule ^admin/usuarios/?$ pages/admin/usuarios.html [L,QSA]
+  RewriteRule ^dashboard/?$ pages/common/dashboard.html [L,QSA]
+  RewriteRule ^error/?$ pages/common/error.php [L,QSA]
+  RewriteRule ^estado/?$ pages/tecnico/estado.html [L,QSA]
+  RewriteRule ^inventario/?$ pages/tecnico/inventario.html [L,QSA]
+  RewriteRule ^login/?$ pages/common/login.html [L,QSA]
+  RewriteRule ^nuevo-componente/?$ pages/tecnico/nuevo-componente.html [L,QSA]
+  RewriteRule ^nuevo-equipo/?$ pages/tecnico/nuevo-equipo.html [L,QSA]
+  RewriteRule ^perfil/?$ pages/common/perfil.html [L,QSA]
+  RewriteRule ^prestamos/?$ pages/tecnico/prestamos.html [L,QSA]
+  RewriteRule ^solicitudes/?$ pages/common/solicitudes.html [L,QSA]
+  RewriteRule ^tickets/?$ pages/common/tickets.html [L,QSA]
+
+  # Cualquier otra direccion con forma de pantalla va a la pagina de error,
+  # igual que en desarrollo. Va al final: las reglas de arriba ya cortaron.
+  RewriteRule ^[a-z0-9-]+(?:/[a-z0-9-]+)?/?$ /error/?error=404 [R=302,L]
+</IfModule>
+
+# Lo que no tiene forma de pantalla (un /assets/ que no existe, por ejemplo)
+# igual termina en la misma pagina, con el codigo correcto.
+ErrorDocument 404 /error/?error=404
+ErrorDocument 403 /error/?error=403
+ErrorDocument 500 /error/?error=500
+
+# Sin mod_rewrite el sistema igual funciona, pero solo con las direcciones
+# largas (/pages/common/tickets.html).

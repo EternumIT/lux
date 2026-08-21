@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SGRSI — Iniciar sesión</title>
+  <script>
+    (function () {
+      document.documentElement.setAttribute("data-perfil", "usuario");
+      try {
+        var p = JSON.parse(localStorage.getItem("eternum:prefs") || "{}");
+        var prefiereOscuro = window.matchMedia &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches;
+        var raiz = document.documentElement;
+        raiz.setAttribute("data-theme", p.theme || (prefiereOscuro ? "dark" : "light"));
+
+        /* El menú no es el mismo para todos los roles. Se resuelve acá, antes
+           del primer pintado y no desde js/app.js, para que el usuario final
+           no llegue a ver las secciones que no puede usar y el personal
+           técnico no las vea desaparecer y volver en cada carga.
+           Arranca en "usuario" (lo más restrictivo) y sube a "personal" solo
+           si la sesión guardada lo confirma; cuando el servidor responde,
+           js/app.js corrige el valor si hiciera falta. */
+        var sesion = JSON.parse(localStorage.getItem("eternum:session") || "null");
+        var personal = !!sesion && ["Root", "Administrador", "Tecnico"].indexOf(sesion.rol) !== -1;
+        raiz.setAttribute("data-perfil", personal ? "personal" : "usuario");
+
+        /* Lo mismo con el menú contraído: si esto se aplicara desde
+           js/components/components.js, cada cambio de página mostraría el menú
+           ancho un instante y después lo vería encogerse. */
+        raiz.setAttribute("data-sidebar",
+          localStorage.getItem("eternum:sidebarCollapsed") === "true" ? "contraida" : "abierta");
+        raiz.setAttribute("data-font-size", p.fontSize || "medium");
+        raiz.setAttribute("data-contrast", p.highContrast ? "high" : "normal");
+        raiz.setAttribute("data-dyslexic", p.dyslexic ? "true" : "false");
+      } catch (e) {
+        /* Si el localStorage no está disponible se sigue con el tema por defecto. */
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="/assets/css/app.css">
+</head>
+<body data-page="login" class="flex min-h-screen items-center justify-center p-4">
+
+  <main class="flex w-full flex-col items-center gap-6 px-4 py-6">
+
+    <header class="flex flex-col items-center gap-2.5 text-center">
+      <img src="/assets/img/logo.png" alt="Logo SGRSI" class="h-12 w-12 rounded-lg object-contain">
+      <h1 class="text-2xl font-bold text-texto">Iniciá sesión</h1>
+      <p class="text-base text-tenue">ITI CETP — Sistema de Gestión de Recursos</p>
+    </header>
+
+    <section class="w-full max-w-md rounded-2xl bg-superficie p-8 shadow-xl max-sm:p-6">
+      <form class="login-form flex flex-col gap-5" novalidate>
+
+        <p class="error-global" role="alert"></p>
+
+        <div class="campo">
+          <label class="etiqueta" for="cedula">Número de Cédula</label>
+          <input type="text" id="cedula" class="control bg-fondo px-4 py-3" placeholder="Ej: 12345678"
+                 maxlength="8" inputmode="numeric" autocomplete="username">
+          <p class="campo-error"></p>
+        </div>
+
+        <div class="campo">
+          <label class="etiqueta" for="contrasena">Contraseña</label>
+          <div class="relative flex items-center">
+            <input type="password" id="contrasena" class="control bg-fondo px-4 py-3 pr-12"
+                   placeholder="Tu contraseña" autocomplete="current-password">
+            <button type="button" id="toggle-password"
+                    class="absolute right-3.5 flex cursor-pointer items-center border-none bg-transparent p-0 text-debil transition-colors hover:text-primario"
+                    aria-label="Mostrar contraseña">
+              <svg class="icono icono-ojo" viewBox="0 0 36 36" fill="currentColor" aria-hidden="true"><path d="M17.9976 11C14.1382 11 10.9987 14.14 10.9987 18C10.9987 21.86 14.1382 25 17.9976 25C21.857 25 24.9965 21.86 24.9965 18C24.9965 14.14 21.857 11 17.9976 11ZM17.9976 23C15.238 23 12.9983 20.76 12.9983 18C12.9983 15.24 15.238 13 17.9976 13C20.7571 13 22.9968 15.24 22.9968 18C22.9968 20.76 20.7571 23 17.9976 23ZM33.9151 17.61C31.1855 11.17 24.9365 7 17.9976 7C11.0586 7 4.80962 11.17 2.08005 17.61C1.97006 17.86 1.97006 18.14 2.08005 18.39C4.80962 24.84 11.0586 29 17.9976 29C24.9365 29 31.1855 24.83 33.9151 18.39C34.0251 18.14 34.0251 17.86 33.9151 17.61ZM17.9976 27C11.9985 27 6.58934 23.48 4.08973 18C6.58934 12.52 11.9985 9 17.9976 9C23.9966 9 29.4058 12.52 31.9054 18C29.4058 23.48 23.9966 27 17.9976 27Z"/></svg><svg class="icono icono-ojo-tachado" viewBox="0 0 36 36" fill="currentColor" aria-hidden="true"><path d="M24.5495 20.4301C24.8294 19.6701 24.9893 18.8601 24.9893 18.0001C24.9893 14.1401 21.8508 11.0001 17.9926 11.0001C17.133 11.0001 16.3233 11.1601 15.5637 11.4401L17.2029 13.0801C17.4628 13.0401 17.7227 13.0001 17.9926 13.0001C20.7513 13.0001 22.9902 15.2401 22.9902 18.0001C22.9902 18.2701 22.9502 18.5301 22.9103 18.7901L24.5495 20.4301ZM17.9926 9.00006C23.9898 9.00006 29.3972 12.5201 31.896 18.0001C30.8965 20.1901 29.4272 22.0601 27.648 23.5301L29.0674 24.9501C31.1264 23.2201 32.8056 20.9901 33.9151 18.3901C34.025 18.1401 34.025 17.8601 33.9151 17.6101C31.1864 11.1601 24.9393 7.00006 18.0026 7.00006C15.9735 7.00006 14.0044 7.37006 12.1653 8.03006L13.7446 9.61006C15.1039 9.21006 16.5332 9.00006 18.0026 9.00006H17.9926ZM3.70926 2.29006C3.31944 1.90006 2.67974 1.90006 2.28992 2.29006C1.9001 2.68006 1.9001 3.32006 2.28992 3.71006L8.47702 9.90006C5.70832 11.7401 3.44938 14.3801 2.08002 17.6101C1.97007 17.8601 1.97007 18.1401 2.08002 18.3901C4.80874 24.8401 11.0558 29.0001 17.9926 29.0001C20.7413 29.0001 23.37 28.3401 25.7189 27.1501L32.2759 33.7101C32.4758 33.9101 32.7257 34.0001 32.9855 34.0001C33.2454 34.0001 33.4953 33.9001 33.6952 33.7101C34.085 33.3201 34.085 32.6901 33.6952 32.3001L3.70926 2.29006ZM13.8345 15.2501L20.7413 22.1601C19.9516 22.6801 19.0121 23.0001 17.9926 23.0001C15.2339 23.0001 12.9949 20.7601 12.9949 18.0001C12.9949 16.9801 13.3048 16.0401 13.8345 15.2501ZM17.9926 27.0001C11.9954 27.0001 6.58791 23.4801 4.08908 18.0001C5.36848 15.1901 7.42751 12.9101 9.92634 11.3401L12.4052 13.8201C11.5256 14.9901 10.9958 16.4301 10.9958 18.0001C10.9958 21.8601 14.1344 25.0001 17.9926 25.0001C19.5618 25.0001 21.0012 24.4701 22.1706 23.5901L24.2296 25.6501C22.3105 26.5201 20.1915 27.0001 17.9926 27.0001Z"/></svg>
+            </button>
+          </div>
+          <p class="campo-error"></p>
+        </div>
+
+        <button type="submit" class="btn-ingresar w-full cursor-pointer rounded-full border-none bg-primario py-3.5 text-base font-bold text-white transition-colors hover:bg-primario-oscuro disabled:opacity-70">
+          Ingresar
+        </button>
+
+      </form>
+    </section>
+
+    <footer>
+      <p class="text-center text-sm text-debil">ITI CETP 2026 · Los accesos son gestionados por administración</p>
+    </footer>
+
+  </main>
+
+  <!-- Utilidades compartidas -->
+  <script src="/js/utils/utils.js" defer></script>
+
+  <!-- repositories: capa de datos, unica que habla con la API -->
+  <script src="/js/repositories/api.js" defer></script>
+  <script src="/js/repositories/datosDeEjemplo.js" defer></script>
+  <script src="/js/repositories/repositorios.js" defer></script>
+
+  <!-- services: capa de negocio, las reglas del sistema -->
+  <script src="/js/services/sesion.js" defer></script>
+  <script src="/js/services/usuarios.js" defer></script>
+  <script src="/js/services/inventario.js" defer></script>
+  <script src="/js/services/tickets.js" defer></script>
+  <script src="/js/services/solicitudes.js" defer></script>
+  <script src="/js/services/prestamos.js" defer></script>
+  <script src="/js/services/resumenes.js" defer></script>
+
+  <!-- components y pages: capa de presentacion -->
+  <script src="/js/components/iconos.js" defer></script>
+  <script src="/js/components/components.js" defer></script>
+  <script src="/js/pages/login.js" defer></script>
+  <script src="/js/app.js" defer></script>
+
+</body>
+</html>

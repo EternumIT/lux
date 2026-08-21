@@ -1,12 +1,10 @@
 /*
  * Arranque y preparacion de la base de datos.
  *
- * En modo "mariadb" el script levanta su propio servidor MariaDB sobre una
- * carpeta de datos dentro del proyecto (database/datos), asi cada integrante
- * tiene su instancia sin instalar XAMPP ni tocar servicios de Windows.
- *
- * En modo "xampp" no se administra nada: se asume que el panel de XAMPP ya
- * tiene MySQL corriendo y solo se comprueba la conexion.
+ * El script levanta su propio servidor MariaDB sobre una carpeta de datos
+ * dentro del proyecto (database/datos): asi cada integrante tiene su instancia,
+ * con sus datos de prueba, sin instalar paquetes aparte ni tocar servicios de
+ * Windows, y sin pisarse con lo que cada uno tenga en su equipo.
  */
 const fs = require("fs");
 const net = require("net");
@@ -99,27 +97,8 @@ function resolverBinMariadb(cfg) {
     "    1. Instalar MariaDB:  https://mariadb.org/download/\n" +
     "       (o con winget:  winget install MariaDB.Server)\n" +
     "    2. Si ya lo tenes instalado en otra ruta, indicala en eternum.config.json:\n" +
-    '         "mariadb": { "rutaBin": "C:/ruta/a/mariadb/bin" }\n' +
-    "    3. Si preferis seguir con XAMPP, cambia el modo en eternum.config.json:\n" +
-    '         "modo": "xampp"'
+    '         "mariadb": { "rutaBin": "C:/ruta/a/mariadb/bin" }'
   );
-}
-
-/** Carpeta bin del MySQL que trae XAMPP. */
-function resolverBinXampp(cfg) {
-  const raiz = cfg.xampp.raiz;
-  const dir = path.join(raiz, "mysql", "bin");
-  if (!buscarEnCarpeta(dir, ["mysqld", "mariadbd"])) {
-    throw new Error(
-      'No se encontro XAMPP en "' + raiz + '".\n\n' +
-      "  Opciones:\n" +
-      "    1. Corregir la ruta en eternum.config.json:\n" +
-      '         "xampp": { "raiz": "C:/ruta/a/xampp" }\n' +
-      "    2. Usar MariaDB propio (no hace falta XAMPP):\n" +
-      '         "modo": "mariadb"'
-    );
-  }
-  return dir;
 }
 
 /** Cliente de linea de comandos, usado para crear la base e importar el schema. */
@@ -350,50 +329,11 @@ async function iniciarMariadb(cfg, conn) {
   return { cliente, detener };
 }
 
-/* ------------------------------------------------------------------ *
- * Modo XAMPP: solo se comprueba, no se administra
- * ------------------------------------------------------------------ */
-
-async function usarXampp(cfg, conn) {
-  const binDir = resolverBinXampp(cfg);
-  const cliente = resolverCliente(binDir);
-  detalle("XAMPP: " + cfg.xampp.raiz);
-
-  if (!(await puertoAbierto(conn.host, conn.puerto))) {
-    if (cfg.xampp.iniciarServicios) {
-      const bat = path.join(cfg.xampp.raiz, "mysql_start.bat");
-      if (!fs.existsSync(bat)) {
-        throw new Error("Se pidio iniciar XAMPP pero no existe " + bat + ".");
-      }
-      log("Iniciando el MySQL de XAMPP ...");
-      spawn("cmd.exe", ["/c", "start", "", "/min", bat], { detached: true, stdio: "ignore" }).unref();
-
-      if (!(await esperarPuerto(conn.host, conn.puerto, 40))) {
-        throw new Error("El MySQL de XAMPP no llego a levantar. Proba iniciarlo desde el panel.");
-      }
-    } else {
-      throw new Error(
-        "No hay nada escuchando en el puerto " + conn.puerto + ": el MySQL de XAMPP parece apagado.\n\n" +
-        "  Opciones:\n" +
-        "    1. Abrir el Panel de Control de XAMPP y darle Start a MySQL.\n" +
-        "    2. Que el comando lo inicie solo, en eternum.config.json:\n" +
-        '         "xampp": { "iniciarServicios": true }\n' +
-        "    3. Usar MariaDB propio, sin XAMPP:\n" +
-        '         "modo": "mariadb"'
-      );
-    }
-  }
-
-  exito("MySQL de XAMPP disponible en 127.0.0.1:" + conn.puerto);
-  // No se apaga al salir: XAMPP lo administra la persona que lo abrio.
-  return { cliente, detener: async () => {} };
-}
-
 /* ------------------------------------------------------------------ */
 
 /** Deja la base lista para usar y devuelve como detenerla. */
 async function preparar(cfg, conn) {
-  const bd = cfg.modo === "xampp" ? await usarXampp(cfg, conn) : await iniciarMariadb(cfg, conn);
+  const bd = await iniciarMariadb(cfg, conn);
 
   try {
     sql(bd.cliente, conn,
@@ -416,6 +356,5 @@ module.exports = {
   // Se exportan para que "npm run doctor" use exactamente la misma logica de
   // busqueda que el lanzador y no puedan dar respuestas distintas.
   resolverBinMariadb,
-  resolverBinXampp,
   resolverCliente
 };

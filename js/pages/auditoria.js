@@ -63,43 +63,45 @@
       ultimosRegistros = datos.registros;
       resumen.textContent = describirResultado(datos);
 
-      if (!datos.registros.length) {
-        tabla.innerHTML = '<p class="mensaje-vacio">' +
-          Eternum.iconos.svg("auditoria", "icono-vacio") +
-          "No hay movimientos que coincidan con los filtros</p>";
-        return;
-      }
+      Eternum.components.listado.render({
+        contenedor: tabla,
+        items: datos.registros,
+        vacio: { icono: "auditoria", mensaje: "No hay movimientos que coincidan con los filtros" },
+        contenido: function (visibles) {
+          var filas = visibles.map(function (r) {
+                return "<tr>" +
+                  '<td class="whitespace-nowrap" data-etiqueta="Fecha">' +
+                    utils.formatDate(r.fecha) + "</td>" +
+                  '<td class="whitespace-nowrap tabular-nums" data-etiqueta="Hora">' + r.hora + "</td>" +
+                  '<td class="celda-bloque" data-etiqueta="Quién">' +
+                    '<div class="flex items-center gap-2">' +
+                      Eternum.iconos.svg("profile", "icono-meta") +
+                      "<span>" + utils.escapeHtml(r.usuarioNombre) + "</span>" +
+                    "</div>" +
+                    '<span class="text-xs text-tenue">' + utils.escapeHtml(r.usuarioRol) + "</span>" +
+                  "</td>" +
+                  '<td class="celda-titulo">' + utils.escapeHtml(r.descripcion) + "</td>" +
+                  '<td class="celda-bloque text-tenue" data-etiqueta="Detalle">' +
+                    (r.detalle ? utils.escapeHtml(r.detalle) : "—") + "</td>" +
+                "</tr>";
+          }).join("");
 
-      var filas = datos.registros.map(function (r) {
-        return "<tr>" +
-          '<td class="whitespace-nowrap">' + utils.formatDate(r.fecha) + "</td>" +
-          '<td class="whitespace-nowrap tabular-nums">' + r.hora + "</td>" +
-          "<td>" +
-            '<div class="flex items-center gap-2">' +
-              Eternum.iconos.svg("profile", "icono-meta") +
-              "<span>" + utils.escapeHtml(r.usuarioNombre) + "</span>" +
-            "</div>" +
-            '<span class="text-xs text-tenue">' + utils.escapeHtml(r.usuarioRol) + "</span>" +
-          "</td>" +
-          "<td>" + utils.escapeHtml(r.descripcion) + "</td>" +
-          '<td class="text-tenue">' + (r.detalle ? utils.escapeHtml(r.detalle) : "—") + "</td>" +
-        "</tr>";
-      }).join("");
-
-      tabla.innerHTML =
-        '<table class="tabla"><thead><tr>' +
-          '<th scope="col">Fecha</th>' +
-          '<th scope="col">Hora</th>' +
-          '<th scope="col">Quién</th>' +
-          '<th scope="col">Qué</th>' +
-          '<th scope="col">Detalle</th>' +
-        "</tr></thead><tbody>" + filas + "</tbody></table>";
+          return '<table class="tabla"><thead><tr>' +
+              '<th scope="col">Fecha</th>' +
+              '<th scope="col">Hora</th>' +
+              '<th scope="col">Quién</th>' +
+              '<th scope="col">Qué</th>' +
+              '<th scope="col">Detalle</th>' +
+            "</tr></thead><tbody>" + filas + "</tbody></table>";
+        }
+      });
     }
 
     function consultar() {
+      Eternum.components.listado.reiniciar(tabla);
       tabla.innerHTML = '<p class="mensaje-vacio">Cargando…</p>';
 
-      Eternum.services.auditoria.getRegistros(filtrosActuales())
+      Eternum.services.auditoria.consultar(filtrosActuales())
         .then(function (datos) {
           cargarOpciones(datos);
           render(datos);

@@ -1,22 +1,12 @@
 /* Sección administrativa: gestión de usuarios. */
 (function () {
   var utils = Eternum.utils;
-  var svc = Eternum.services.usuarios;
 
-  var ROLES = ["Root", "Administrador", "Tecnico", "Docente"];
-  var ETIQUETA_ROL = {
-    Root: "Root",
-    Administrador: "Administrador",
-    Tecnico: "Técnico",
-    Docente: "Docente"
-  };
-  // Se reutilizan las insignias de estado que ya existen para el resto del sistema.
-  var INSIGNIA_ROL = {
-    Root: "insignia-vencido",
-    Administrador: "insignia-en_progreso",
-    Tecnico: "insignia-en_resolucion",
-    Docente: "insignia-resuelto"
-  };
+  // Quién puede gestionar a quién, qué roles se pueden asignar y cómo se
+  // filtra son reglas: viven en la capa de negocio.
+  var negocio = Eternum.services.usuarios;
+  var ETIQUETA_ROL = negocio.ETIQUETA_ROL;
+  var INSIGNIA_ROL = negocio.INSIGNIA_ROL;
 
   document.addEventListener("DOMContentLoaded", function () {
     var lista = utils.qs("#lista");
@@ -30,31 +20,22 @@
     var usuarios = [];
     var yo = null;
 
-    /** Solo Root puede crear o tocar cuentas Root y Administrador. */
     function puedeGestionar(usuario) {
-      if (!yo) return false;
-      if (yo.rol === "Root") return true;
-      return usuario.rol !== "Root" && usuario.rol !== "Administrador";
+      return negocio.puedeGestionar(yo, usuario);
     }
 
-    function rolesAsignables() {
-      return yo && yo.rol === "Root" ? ROLES : ["Tecnico", "Docente"];
-    }
-
-    function opcionesRol(seleccionado) {
-      return rolesAsignables().map(function (rol) {
+    // "objetivo" es la cuenta que se está editando, o null si es una alta:
+    // según cuál sea cambia qué roles se pueden elegir.
+    function opcionesRol(seleccionado, objetivo) {
+      return negocio.rolesAsignables(yo, objetivo).map(function (rol) {
         return '<option value="' + rol + '"' + (rol === seleccionado ? " selected" : "") + ">" +
           ETIQUETA_ROL[rol] + "</option>";
       }).join("");
     }
 
     function actualizarMetricas() {
-      var m = {
-        total: usuarios.length,
-        activos: usuarios.filter(function (u) { return !u.bloqueado; }).length,
-        bloqueados: usuarios.filter(function (u) { return u.bloqueado; }).length,
-        admins: usuarios.filter(function (u) { return u.rol === "Root" || u.rol === "Administrador"; }).length
-      };
+      var m = negocio.metricas(usuarios);
+
       Object.keys(m).forEach(function (clave) {
         var el = utils.qs('[data-metrica="' + clave + '"]');
         if (el) el.textContent = m[clave];
@@ -62,66 +43,67 @@
     }
 
     function filtrar() {
-      var texto = (buscador.value || "").toLowerCase().trim();
-      var rol = selRol.value;
-      var estado = selEstado.value;
-
-      return usuarios.filter(function (u) {
-        var coincideTexto = !texto ||
-          (u.nombre + " " + u.cedula + " " + u.email).toLowerCase().indexOf(texto) !== -1;
-        var coincideEstado = !estado ||
-          (estado === "bloqueado" ? u.bloqueado : !u.bloqueado);
-        return coincideTexto && (!rol || u.rol === rol) && coincideEstado;
+      return negocio.filtrar(usuarios, {
+        texto: buscador.value,
+        rol: selRol.value,
+        estado: selEstado.value
       });
     }
 
     function render() {
       var filtrados = filtrar();
 
-      if (!filtrados.length) {
-        lista.innerHTML =
-          '<p class="mensaje-vacio">' + Eternum.iconos.svg("usuarios", "icono-vacio") + 'No se encontraron usuarios</p>';
-        return;
-      }
+      Eternum.components.listado.render({
+        contenedor: lista,
+        items: filtrados,
+        vacio: { icono: "usuarios", mensaje: "No se encontraron usuarios" },
+        contenido: function (visibles) {
+          return '<div class="flex flex-col">' + visibles.map(function (u) {
+            var gestionable = puedeGestionar(u);
+            var bloqueable = negocio.puedeBloquear(yo, u);
+            var soyYo = Eternum.services.sesion.esUnoMismo(yo, u);
 
-      lista.innerHTML = '<div class="flex flex-col">' + filtrados.map(function (u) {
-        var gestionable = puedeGestionar(u);
-        var soyYo = yo && String(u.id) === String(yo.id);
-
-        return (
-          '<article class="item-lista' + (u.bloqueado ? " opacity-60" : "") + '">' +
-            '<div class="flex min-w-0 flex-1 items-center gap-4">' +
-              '<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full ' +
-                   (u.bloqueado ? "bg-debil" : "bg-primario") + ' text-xs font-bold text-white">' +
-                utils.escapeHtml(u.iniciales) +
-              "</div>" +
-              '<div class="flex min-w-0 flex-col gap-1">' +
-                '<div class="item-titulo">' + utils.escapeHtml(u.nombre) +
-                  ' <span class="insignia ' + INSIGNIA_ROL[u.rol] + '">' + ETIQUETA_ROL[u.rol] + "</span>" +
-                  (u.bloqueado ? ' <span class="insignia insignia-baja">Bloqueado</span>' : "") +
-                  (soyYo ? ' <span class="text-xs text-tenue">(vos)</span>' : "") +
+            return (
+              '<article class="item-lista' + (u.bloqueado ? " opacity-60" : "") + '">' +
+                '<div class="flex min-w-0 flex-1 items-center gap-4">' +
+                  '<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full ' +
+                       (u.bloqueado ? "bg-debil" : "bg-primario") + ' text-xs font-bold text-white">' +
+                    utils.escapeHtml(u.iniciales) +
+                  "</div>" +
+                  '<div class="flex min-w-0 flex-col gap-1">' +
+                    '<div class="item-titulo">' + utils.escapeHtml(u.nombre) +
+                      ' <span class="insignia ' + INSIGNIA_ROL[u.rol] + '">' + ETIQUETA_ROL[u.rol] + "</span>" +
+                      (u.bloqueado ? ' <span class="insignia insignia-baja">Bloqueado</span>' : "") +
+                      (soyYo ? ' <span class="text-xs text-tenue">(vos)</span>' : "") +
+                    "</div>" +
+                    '<div class="item-meta">' +
+                      "<span>" + Eternum.iconos.svg("cedula", "icono-meta") + " " + utils.escapeHtml(u.cedula) + "</span>" +
+                      "<span>" + Eternum.iconos.svg("email", "icono-meta") + " " + utils.escapeHtml(u.email) + "</span>" +
+                    "</div>" +
+                  "</div>" +
                 "</div>" +
-                '<div class="item-meta">' +
-                  "<span>" + Eternum.iconos.svg("cedula", "icono-meta") + " " + utils.escapeHtml(u.cedula) + "</span>" +
-                  "<span>" + Eternum.iconos.svg("email", "icono-meta") + " " + utils.escapeHtml(u.email) + "</span>" +
+                '<div class="flex shrink-0 flex-wrap items-center gap-2">' +
+                  (gestionable
+                    ? '<button type="button" class="btn-secundario" data-editar="' + u.id + '">Editar</button>'
+                    : "") +
+                  (bloqueable
+                    ? '<button type="button" class="' + (u.bloqueado ? "btn-secundario" : "btn-peligro") +
+                      '" data-bloqueo="' + u.id + '">' + (u.bloqueado ? "Desbloquear" : "Bloquear") + "</button>"
+                    : "") +
+                  (!gestionable
+                    ? '<span class="text-xs text-tenue">Solo Root puede gestionarlo</span>'
+                    : "") +
+                  // Se dice por qué falta el botón: si no, parece que la
+                  // pantalla se olvidó de dibujarlo.
+                  (gestionable && !bloqueable && !soyYo && u.rol === negocio.ROL_RAIZ
+                    ? '<span class="text-xs text-tenue">La cuenta Root no se bloquea</span>'
+                    : "") +
                 "</div>" +
-              "</div>" +
-            "</div>" +
-            '<div class="flex shrink-0 flex-wrap items-center gap-2">' +
-              (gestionable
-                ? '<button type="button" class="btn-secundario" data-editar="' + u.id + '">Editar</button>'
-                : "") +
-              (gestionable && !soyYo
-                ? '<button type="button" class="' + (u.bloqueado ? "btn-secundario" : "btn-peligro") +
-                  '" data-bloqueo="' + u.id + '">' + (u.bloqueado ? "Desbloquear" : "Bloquear") + "</button>"
-                : "") +
-              (!gestionable
-                ? '<span class="text-xs text-tenue">Solo Root puede gestionarlo</span>'
-                : "") +
-            "</div>" +
-          "</article>"
-        );
-      }).join("") + "</div>";
+              "</article>"
+            );
+          }).join("") + "</div>";
+        }
+      });
     }
 
     /* ---------------- Alta ---------------- */
@@ -171,7 +153,7 @@
           }
           if (!valido) return;
 
-          svc.createUsuario({
+          negocio.crear({
             nombre: nombre.value.trim(),
             cedula: cedula.value.trim(),
             email: email.value.trim(),
@@ -206,7 +188,7 @@
             '<p class="campo-error"></p></div>' +
           '<div class="campo"><label class="etiqueta" for="ed-rol">Rol</label>' +
             '<select id="ed-rol" class="control"' + (soyYo ? " disabled" : "") + ">" +
-              opcionesRol(usuario.rol) + "</select>" +
+              opcionesRol(usuario.rol, usuario) + "</select>" +
             (soyYo ? '<p class="text-xs text-tenue">No podés cambiarte el rol a vos mismo.</p>' : "") +
           "</div>" +
           '<div class="campo"><label class="etiqueta" for="ed-password">Nueva contraseña</label>' +
@@ -243,7 +225,7 @@
           if (!soyYo) cambios.rol = caja.querySelector("#ed-rol").value;
           if (password.value) cambios.password = password.value;
 
-          svc.updateUsuario(usuario.id, cambios).then(function (actualizado) {
+          negocio.actualizar(usuario.id, cambios).then(function (actualizado) {
             var i = usuarios.findIndex(function (u) { return String(u.id) === String(actualizado.id); });
             if (i !== -1) usuarios[i] = actualizado;
             render();
@@ -274,7 +256,7 @@
       if (!usuario) return;
 
       btnBloqueo.disabled = true;
-      svc.setBloqueo(id, !usuario.bloqueado).then(function (actualizado) {
+      negocio.cambiarBloqueo(id, !usuario.bloqueado).then(function (actualizado) {
         var i = usuarios.findIndex(function (x) { return String(x.id) === String(actualizado.id); });
         if (i !== -1) usuarios[i] = actualizado;
         render();
@@ -291,18 +273,24 @@
       });
     });
 
-    utils.on(buscador, "input", utils.debounce(render, 200));
-    utils.on(selRol, "change", render);
-    utils.on(selEstado, "change", render);
+    /** Un filtro nuevo empieza desde la primera página. */
+    function renderDesdeFiltro() {
+      Eternum.components.listado.reiniciar(lista);
+      render();
+    }
+
+    utils.on(buscador, "input", utils.debounce(renderDesdeFiltro, 200));
+    utils.on(selRol, "change", renderDesdeFiltro);
+    utils.on(selEstado, "change", renderDesdeFiltro);
     utils.on(btnNuevo, "click", abrirAlta);
 
     /* ---------------- Carga inicial ---------------- */
-    Eternum.services.auth.verificarSesion().then(function (usuario) {
+    Eternum.services.sesion.verificar().then(function (usuario) {
       // Si no hay permiso, app.js ya redirige; acá solo se evita seguir.
-      if (!Eternum.services.esAdmin(usuario)) return;
+      if (!Eternum.services.sesion.esAdmin(usuario)) return;
       yo = usuario;
 
-      return svc.getUsuarios().then(function (data) {
+      return negocio.listar().then(function (data) {
         usuarios = data;
         render();
         actualizarMetricas();

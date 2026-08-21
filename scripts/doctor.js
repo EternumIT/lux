@@ -8,11 +8,13 @@ const fs = require("fs");
 const path = require("path");
 const { spawnSync } = require("child_process");
 
+/** Tablas que tiene el esquema completo. */
+const TABLAS_ESPERADAS = 9;
+
 const { cargar, conexion } = require("./lib/config");
 const {
   puertoAbierto,
   resolverBinMariadb,
-  resolverBinXampp,
   resolverCliente
 } = require("./lib/basedatos");
 const { resolverPhp } = require("./lib/web");
@@ -74,8 +76,6 @@ function revisarPhp(cfg) {
 }
 
 function revisarMariadb(cfg) {
-  if (cfg.modo !== "mariadb") return;
-
   let binDir;
   try {
     binDir = resolverBinMariadb(cfg);
@@ -98,17 +98,6 @@ function revisarMariadb(cfg) {
   }
 }
 
-function revisarXampp(cfg) {
-  if (cfg.modo !== "xampp") return;
-
-  try {
-    resolverBinXampp(cfg);
-    ok("XAMPP encontrado", cfg.xampp.raiz);
-  } catch (e) {
-    mal(e.message.split("\n")[0], e.message.split("\n").slice(1).filter((l) => l.trim()));
-  }
-}
-
 async function revisarPuertos(cfg, conn) {
   const web = await puertoAbierto(cfg.servidor.host, cfg.servidor.puerto);
   if (web) {
@@ -121,12 +110,6 @@ async function revisarPuertos(cfg, conn) {
   const bd = await puertoAbierto(conn.host, conn.puerto);
   if (bd) {
     ok("hay una base escuchando en " + conn.host + ":" + conn.puerto);
-  } else if (cfg.modo === "xampp") {
-    mal("no hay nada escuchando en " + conn.host + ":" + conn.puerto, [
-      "El MySQL de XAMPP parece apagado.",
-      "Abri el Panel de Control de XAMPP y dale Start a MySQL,",
-      'o pone  "xampp": { "iniciarServicios": true }  en eternum.config.json.'
-    ]);
   } else {
     detalle("todavia no hay base en " + conn.host + ":" + conn.puerto + " (la levanta 'npm run main')");
   }
@@ -137,7 +120,7 @@ async function revisarPuertos(cfg, conn) {
 function revisarConexion(cfg, conn) {
   let cliente;
   try {
-    const binDir = cfg.modo === "xampp" ? resolverBinXampp(cfg) : resolverBinMariadb(cfg);
+    const binDir = resolverBinMariadb(cfg);
     cliente = resolverCliente(binDir);
   } catch {
     aviso("no se encontro el cliente mariadb/mysql; no se pudo probar la conexion");
@@ -157,7 +140,7 @@ function revisarConexion(cfg, conn) {
     mal("la base rechaza la conexion", [
       String(prueba.stderr || "").trim().split(/\r?\n/)[0] || "sin detalle",
       "",
-      "Revisa usuario y contrasena en eternum.config.json, seccion \"" + cfg.modo + "\"."
+      "Revisa usuario y contrasena en eternum.config.json, seccion \"mariadb\"."
     ]);
     return;
   }
@@ -169,16 +152,14 @@ function revisarConexion(cfg, conn) {
   ]), { encoding: "utf8" });
 
   const cantidad = Number(String(tablas.stdout || "0").trim()) || 0;
-  if (cantidad >= 6) {
+  if (cantidad >= TABLAS_ESPERADAS) {
     ok('base "' + conn.nombre + '" con ' + cantidad + " tablas");
   } else if (cantidad === 0) {
     aviso('la base "' + conn.nombre + '" esta vacia; "npm run main" importara database/schema.sql');
   } else {
-    mal('la base "' + conn.nombre + '" tiene solo ' + cantidad + " tablas (deberian ser 6)", [
+    mal('la base "' + conn.nombre + '" tiene solo ' + cantidad + " tablas (deberian ser " + TABLAS_ESPERADAS + ")", [
       "Quedo a medio importar. Para rehacerla desde cero:",
-      cfg.modo === "mariadb"
-        ? "  detene npm run main, borra database/datos/ y volve a arrancar"
-        : "  importa database/schema.sql de nuevo desde phpMyAdmin"
+      "  detene npm run main, borra database/datos/ y volve a arrancar"
     ]);
   }
 }
@@ -210,13 +191,12 @@ async function main() {
   const conn = conexion(cfg);
 
   titulo("Diagnostico del entorno");
-  console.log(gris("  modo: ") + negrita(cfg.modo) + (cfg.usaLocal ? gris("   [con eternum.config.local.json]") : ""));
+  console.log(gris("  base: ") + negrita("MariaDB del proyecto") + (cfg.usaLocal ? gris("   [con eternum.config.local.json]") : ""));
   console.log("");
 
   revisarNode();
   revisarPhp(cfg);
   revisarMariadb(cfg);
-  revisarXampp(cfg);
   revisarEstilos(cfg);
   console.log("");
 

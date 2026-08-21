@@ -5,8 +5,6 @@
   "private": true,
   "scripts": {
     "main": "node scripts/main.js",
-    "main:xampp": "node scripts/main.js --modo=xampp",
-    "main:mariadb": "node scripts/main.js --modo=mariadb",
     "doctor": "node scripts/doctor.js",
     "css": "tailwindcss -i assets/css/input.css -o assets/css/app.css --minify",
     "css:watch": "tailwindcss -i assets/css/input.css -o assets/css/app.css --watch"

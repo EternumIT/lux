@@ -47,10 +47,10 @@
       submit.disabled = true;
       submit.textContent = "Ingresando...";
 
-      Eternum.services.auth.login(cedula.value.trim(), pass.value)
+      Eternum.services.sesion.entrar(cedula.value.trim(), pass.value)
         .then(function () {
           utils.storageSet("eternum:flash", { type: "exito", message: "¡Bienvenido/a de nuevo!" });
-          window.location.href = "../dashboard/dashboard.html";
+          window.location.href = "/dashboard/";
         })
         .catch(function (err) {
           mostrarError(err.message || "No se pudo iniciar sesión.");
